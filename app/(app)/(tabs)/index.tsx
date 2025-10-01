@@ -1,4 +1,5 @@
 import ParallaxScrollView from "@/components/parallax-scroll-view";
+import { SignOutButton } from "@/components/SignOutButton";
 import { Image } from "expo-image";
 import { Link } from "expo-router";
 import { StyleSheet } from "react-native";
@@ -38,6 +39,8 @@ export default function HomeScreen() {
       <Link href="https://www.papareact.com/journal-ai-form" asChild>
         <Button theme="red">Get the code here</Button>
       </Link>
+
+      <SignOutButton />
     </ParallaxScrollView>
   );
 }
