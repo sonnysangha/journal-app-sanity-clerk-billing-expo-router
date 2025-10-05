@@ -1,4 +1,5 @@
 import Logo from "@/components/Logo";
+import SignInWithGoogle from "@/components/SignInWithGoogle";
 import { useModal } from "@/contexts/ModalContext";
 import { isClerkAPIResponseError, useSignIn } from "@clerk/clerk-expo";
 import { ClerkAPIResponseError } from "@clerk/types";
@@ -134,12 +135,15 @@ export default function Page() {
               <Button
                 size="$4"
                 theme="blue"
+                borderColor="$borderColor"
                 onPress={onSignInPress}
                 disabled={!isLoaded || isLoading}
                 opacity={!isLoaded || isLoading ? 0.5 : 1}
               >
                 {isLoading ? "Signing in..." : "Sign In"}
               </Button>
+
+              <SignInWithGoogle />
             </YStack>
           </Card>
 

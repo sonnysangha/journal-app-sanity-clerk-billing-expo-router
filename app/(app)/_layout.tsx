@@ -19,14 +19,6 @@ export default function Layout() {
             </Stack.Protected> */}
 
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-
-        <Stack.Screen
-          name="set-username"
-          options={{
-            headerTitle: "Set Username",
-            headerBackTitle: "Back",
-          }}
-        />
       </Stack.Protected>
 
       <Stack.Protected guard={!isSignedIn}>
