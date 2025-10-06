@@ -1,11 +1,12 @@
 import CreateEntryButton from "@/components/CreateEntryButton";
-import { deleteJournalEntry, fetchJournalEntries } from "@/lib/sanity/journal";
+import { getMoodConfig } from "@/lib/constants/moods";
+import { fetchJournalEntries } from "@/lib/sanity/journal";
 import { useUser } from "@clerk/clerk-expo";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -30,14 +31,6 @@ interface JournalEntry {
 interface GroupedEntries {
   [date: string]: JournalEntry[];
 }
-
-const MOOD_EMOJIS: Record<string, string> = {
-  "very-sad": "😢",
-  sad: "😞",
-  neutral: "😐",
-  happy: "😊",
-  "very-happy": "😄",
-};
 
 export default function EntriesScreen() {
   const { user } = useUser();
@@ -84,37 +77,6 @@ export default function EntriesScreen() {
 
   const handleEntryPress = (entryId: string) => {
     router.push(`/entry/${entryId}`);
-  };
-
-  const handleDeleteEntry = (entryId: string, entryTitle?: string) => {
-    Alert.alert(
-      "Delete Entry?",
-      `Are you sure you want to delete ${
-        entryTitle ? `"${entryTitle}"` : "this entry"
-      }? This action cannot be undone.`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: () => confirmDeleteEntry(entryId),
-        },
-      ]
-    );
-  };
-
-  const confirmDeleteEntry = async (entryId: string) => {
-    try {
-      await deleteJournalEntry(entryId);
-      // Refresh the entries list
-      loadEntries();
-    } catch (error) {
-      console.error("Failed to delete journal entry:", error);
-      Alert.alert(
-        "Error",
-        "Failed to delete the journal entry. Please try again."
-      );
-    }
   };
 
   if (loading) {
@@ -166,7 +128,7 @@ export default function EntriesScreen() {
             </Text>
 
             {dayEntries.map((entry) => {
-              const moodEmoji = MOOD_EMOJIS[entry.mood] || "😐";
+              const moodConfig = getMoodConfig(entry.mood);
               const preview =
                 entry.content?.[0]?.children?.[0]?.text?.slice(0, 100) ||
                 "No content";
@@ -176,30 +138,32 @@ export default function EntriesScreen() {
                   <TouchableOpacity
                     style={styles.entryCard}
                     onPress={() => handleEntryPress(entry._id)}
-                    onLongPress={() =>
-                      handleDeleteEntry(entry._id, entry.title)
-                    }
                   >
                     <View style={styles.entryHeader}>
                       <Text style={styles.entryTitle}>
                         {entry.title ||
-                          `${moodEmoji} ${new Date(
-                            entry.createdAt
-                          ).toLocaleTimeString("en-US", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}`}
+                          new Date(entry.createdAt).toLocaleTimeString(
+                            "en-US",
+                            {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            }
+                          )}
                       </Text>
                       <View style={styles.entryActions}>
-                        <Text style={styles.moodEmoji}>{moodEmoji}</Text>
-                        <TouchableOpacity
-                          style={styles.deleteButtonSmall}
-                          onPress={() =>
-                            handleDeleteEntry(entry._id, entry.title)
-                          }
+                        <MaterialIcons
+                          size={20}
+                          name={moodConfig.icon as any}
+                          color={moodConfig.color}
+                        />
+                        <Text
+                          style={[
+                            styles.moodLabel,
+                            { color: moodConfig.color },
+                          ]}
                         >
-                          <Text style={styles.deleteButtonSmallText}>×</Text>
-                        </TouchableOpacity>
+                          {moodConfig.label}
+                        </Text>
                       </View>
                     </View>
 
@@ -230,8 +194,6 @@ export default function EntriesScreen() {
           </View>
         ))}
       </ScrollView>
-
-      <CreateEntryButton />
     </View>
   );
 }
@@ -319,25 +281,12 @@ const styles = StyleSheet.create({
   entryActions: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: 8,
     marginLeft: 12,
   },
-  moodEmoji: {
-    fontSize: 24,
-  },
-  deleteButtonSmall: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: "#ef4444",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  deleteButtonSmallText: {
-    color: "white",
-    fontSize: 18,
+  moodLabel: {
+    fontSize: 13,
     fontWeight: "600",
-    lineHeight: 18,
   },
   entryPreview: {
     fontSize: 16,

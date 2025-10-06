@@ -1,8 +1,9 @@
-import { IconSymbol } from "@/components/ui/icon-symbol";
+import { MOOD_OPTIONS } from "@/lib/constants/moods";
 import { useUser } from "@clerk/clerk-expo";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
-import React, { useState } from "react";
+import React, { useState, useTransition } from "react";
 import {
   Alert,
   Platform,
@@ -39,24 +40,6 @@ interface JournalEntryFormProps {
   onCancel: () => void;
 }
 
-const MOOD_OPTIONS = [
-  {
-    icon: "face.dashed",
-    label: "Very Sad",
-    value: "very-sad",
-    color: "#ef4444",
-  },
-  { icon: "cloud.rain", label: "Sad", value: "sad", color: "#f97316" },
-  { icon: "circle", label: "Neutral", value: "neutral", color: "#6b7280" },
-  { icon: "sun.max", label: "Happy", value: "happy", color: "#22c55e" },
-  {
-    icon: "sparkles",
-    label: "Very Happy",
-    value: "very-happy",
-    color: "#eab308",
-  },
-];
-
 export default function JournalEntryForm({
   initialData,
   isEditing = false,
@@ -67,6 +50,7 @@ export default function JournalEntryForm({
   const [title, setTitle] = useState(initialData?.title || "");
   const [content, setContent] = useState(initialData?.content || "");
   const [mood, setMood] = useState(initialData?.mood || "");
+  const [isLoading, startTransition] = useTransition();
   const [images, setImages] = useState<JournalImage[]>(
     initialData?.images || []
   );
@@ -141,44 +125,50 @@ export default function JournalEntryForm({
   };
 
   const removeImage = (index: number) => {
-    const newImages = images.filter((_, i) => i !== index);
-    setImages(newImages);
+    startTransition(() => {
+      const newImages = images.filter((_, i) => i !== index);
+      setImages(newImages);
+    });
   };
 
   const updateImageCaption = (index: number, caption: string) => {
-    const newImages = [...images];
-    newImages[index].caption = caption;
-    setImages(newImages);
+    startTransition(() => {
+      const newImages = [...images];
+      newImages[index].caption = caption;
+      setImages(newImages);
+    });
   };
 
   const handleSave = () => {
-    if (!content.trim()) {
-      Alert.alert(
-        "Missing content",
-        "Please write something in your journal entry."
-      );
-      return;
-    }
+    startTransition(() => {
+      if (!content.trim()) {
+        Alert.alert(
+          "Missing content",
+          "Please write something in your journal entry."
+        );
+        return;
+      }
 
-    if (!mood) {
-      Alert.alert("Missing mood", "Please select how you're feeling.");
-      return;
-    }
+      if (!mood) {
+        Alert.alert("Missing mood", "Please select how you're feeling.");
+        return;
+      }
 
-    if (!user?.id) {
-      Alert.alert(
-        "Authentication error",
-        "Please sign in to save your journal entry."
-      );
-      return;
-    }
+      if (!user?.id) {
+        Alert.alert(
+          "Authentication error",
+          "Please sign in to save your journal entry."
+        );
+        return;
+      }
 
-    onSave({
-      title: title.trim() || undefined,
-      content: content.trim(),
-      images,
-      mood,
-      userId: user.id,
+      onSave({
+        title: title.trim() || undefined,
+        content: content.trim(),
+        images,
+        mood,
+        userId: user.id,
+      });
     });
   };
 
@@ -221,7 +211,7 @@ export default function JournalEntryForm({
                 ]}
                 onPress={() => setMood(option.value)}
               >
-                <IconSymbol
+                <MaterialIcons
                   size={20}
                   name={option.icon as any}
                   color={mood === option.value ? option.color : "#9ca3af"}
@@ -266,7 +256,7 @@ export default function JournalEntryForm({
                   style={styles.removeImageButton}
                   onPress={() => removeImage(index)}
                 >
-                  <IconSymbol size={16} name="xmark" color="white" />
+                  <MaterialIcons size={16} name="close" color="white" />
                 </TouchableOpacity>
                 <TextInput
                   style={styles.imageCaption}
@@ -288,12 +278,12 @@ export default function JournalEntryForm({
             style={styles.toolbarButton}
             onPress={showImageOptions}
           >
-            <IconSymbol size={22} name="photo" color="#6b7280" />
+            <MaterialIcons size={22} name="photo" color="#6b7280" />
           </TouchableOpacity>
 
           {selectedMood && (
             <View style={styles.selectedMoodIndicator}>
-              <IconSymbol
+              <MaterialIcons
                 size={18}
                 name={selectedMood.icon as any}
                 color={selectedMood.color}
@@ -304,12 +294,20 @@ export default function JournalEntryForm({
         </View>
 
         <View style={styles.toolbarRight}>
-          <TouchableOpacity style={styles.cancelButton} onPress={onCancel}>
+          <TouchableOpacity
+            disabled={isLoading}
+            style={styles.cancelButton}
+            onPress={onCancel}
+          >
             <Text style={styles.cancelButtonText}>Cancel</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-            <IconSymbol size={18} name="checkmark" color="white" />
+          <TouchableOpacity
+            disabled={isLoading}
+            style={styles.saveButton}
+            onPress={handleSave}
+          >
+            <MaterialIcons size={18} name="check" color="white" />
             <Text style={styles.saveButtonText}>
               {isEditing ? "Update" : "Save"}
             </Text>

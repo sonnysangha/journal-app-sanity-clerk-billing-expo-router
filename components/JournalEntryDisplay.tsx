@@ -1,4 +1,6 @@
+import { getMoodConfig } from "@/lib/constants/moods";
 import { urlFor } from "@/lib/sanity/client";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { PortableText } from "@portabletext/react-native";
 import { Image } from "expo-image";
 import React from "react";
@@ -18,18 +20,10 @@ interface JournalEntryDisplayProps {
   };
 }
 
-const MOOD_EMOJIS: Record<string, string> = {
-  "very-sad": "😢",
-  sad: "😞",
-  neutral: "😐",
-  happy: "😊",
-  "very-happy": "😄",
-};
-
 export default function JournalEntryDisplay({
   entry,
 }: JournalEntryDisplayProps) {
-  const moodEmoji = MOOD_EMOJIS[entry.mood] || "😐";
+  const moodConfig = getMoodConfig(entry.mood);
   const date = new Date(entry.createdAt).toLocaleDateString("en-US", {
     weekday: "long",
     year: "numeric",
@@ -131,7 +125,11 @@ export default function JournalEntryDisplay({
         <View style={styles.headerTop}>
           <Text style={styles.date}>{date}</Text>
           <View style={styles.moodContainer}>
-            <Text style={styles.moodEmoji}>{moodEmoji}</Text>
+            <MaterialIcons
+              size={28}
+              name={moodConfig.icon as any}
+              color={moodConfig.color}
+            />
           </View>
         </View>
 
@@ -184,9 +182,6 @@ const styles = StyleSheet.create({
   },
   moodContainer: {
     backgroundColor: "transparent",
-  },
-  moodEmoji: {
-    fontSize: 28,
   },
   title: {
     fontSize: 28,

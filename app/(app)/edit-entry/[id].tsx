@@ -4,6 +4,7 @@ import { getJournalEntryById, updateJournalEntry } from "@/lib/sanity/journal";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface JournalEntry {
   _id: string;
@@ -24,6 +25,7 @@ export default function EditEntryScreen() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { top, bottom } = useSafeAreaInsets();
 
   useEffect(() => {
     if (!id) return;
@@ -32,7 +34,7 @@ export default function EditEntryScreen() {
       try {
         const fetchedEntry = await getJournalEntryById(id);
         if (fetchedEntry) {
-          setEntry(fetchedEntry);
+          setEntry(fetchedEntry as JournalEntry);
         } else {
           setError("Entry not found");
         }
@@ -154,7 +156,9 @@ export default function EditEntryScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[styles.container, { paddingTop: top, paddingBottom: bottom }]}
+    >
       <JournalEntryForm
         initialData={initialData}
         onSave={handleSave}

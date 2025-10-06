@@ -177,6 +177,13 @@ export default function EntryDetailScreen() {
           )}
         </View>
 
+        <Text style={styles.timeText}>
+          {new Date(entry.createdAt).toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+        </Text>
+
         <JournalEntryDisplay entry={entry} />
       </ScrollView>
     </SafeAreaView>
@@ -241,5 +248,11 @@ const styles = StyleSheet.create({
     color: "#6b7280",
     fontSize: 14,
     fontWeight: "500",
+  },
+  timeText: {
+    fontSize: 13,
+    color: "#9ca3af",
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
   },
 });

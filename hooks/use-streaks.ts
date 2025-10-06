@@ -1,12 +1,12 @@
-import { useEffect, useState, useCallback } from "react";
-import { useUser } from "@clerk/clerk-expo";
 import { fetchJournalEntries } from "@/lib/sanity/journal";
 import {
   calculateStreaks,
-  isStreakActive,
-  getStreakStatusMessage,
   getDaysUntilNextMilestone,
+  getStreakStatusMessage,
+  isStreakActive,
 } from "@/lib/utils/streaks";
+import { useUser } from "@clerk/clerk-expo";
+import { useCallback, useEffect, useState } from "react";
 
 interface UseStreaksReturn {
   currentStreak: number;
@@ -48,14 +48,15 @@ export const useStreaks = (): UseStreaksReturn => {
     try {
       setIsLoading(true);
       setError(null);
-      
+
       const journalEntries = await fetchJournalEntries(user.id);
       setEntries(journalEntries);
-      
+
       const calculatedStreaks = calculateStreaks(journalEntries);
       setStreakData(calculatedStreaks);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to load streaks";
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to load streaks";
       console.error("Error loading streak data:", err);
       setError(errorMessage);
     } finally {
@@ -70,7 +71,7 @@ export const useStreaks = (): UseStreaksReturn => {
   // Calculate derived values using useMemo for performance
   const isActive = isStreakActive(entries);
   const statusMessage = getStreakStatusMessage(streakData);
-  const { daysUntil: daysUntilNextMilestone, milestone: nextMilestone } = 
+  const { daysUntil: daysUntilNextMilestone, milestone: nextMilestone } =
     getDaysUntilNextMilestone(streakData.currentStreak);
 
   return {
