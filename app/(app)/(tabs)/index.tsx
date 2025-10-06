@@ -76,8 +76,9 @@ export default function HomeScreen() {
   }
 
   return (
-    <View style={styles.container} px="$4">
+    <View style={styles.container}>
       <ScrollView
+        px="$4"
         style={{
           ...styles.content,
           paddingTop: insets.top,
