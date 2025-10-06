@@ -1,8 +1,8 @@
-interface JournalEntry {
+// Minimal type for streak calculations - only needs _id and createdAt
+type JournalEntry = {
   _id: string;
   createdAt: string;
-  [key: string]: any;
-}
+};
 
 interface StreakData {
   currentStreak: number;

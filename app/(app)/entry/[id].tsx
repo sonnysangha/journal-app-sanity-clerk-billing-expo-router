@@ -1,5 +1,6 @@
 import JournalEntryDisplay from "@/components/JournalEntryDisplay";
 import { deleteJournalEntry, getJournalEntryById } from "@/lib/sanity/journal";
+import type { JOURNAL_ENTRY_BY_ID_QUERYResult } from "@/sanity/sanity.types";
 import { useUser } from "@clerk/clerk-expo";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -15,23 +16,10 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, XStack } from "tamagui";
 
-interface JournalEntry {
-  _id: string;
-  title?: string;
-  content: any[];
-  mood: string;
-  createdAt: string;
-  userId: string;
-  aiGeneratedCategory?: {
-    title: string;
-    color?: string;
-  };
-}
-
 export default function EntryDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { user } = useUser();
-  const [entry, setEntry] = useState<JournalEntry | null>(null);
+  const [entry, setEntry] = useState<JOURNAL_ENTRY_BY_ID_QUERYResult>(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -178,7 +166,7 @@ export default function EntryDetailScreen() {
         </View>
 
         <Text style={styles.timeText}>
-          {new Date(entry.createdAt).toLocaleTimeString("en-US", {
+          {new Date(entry.createdAt ?? new Date()).toLocaleTimeString("en-US", {
             hour: "2-digit",
             minute: "2-digit",
           })}

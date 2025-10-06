@@ -1,27 +1,15 @@
 import JournalEntryForm from "@/components/JournalEntryForm";
 import { urlFor } from "@/lib/sanity/client";
 import { getJournalEntryById, updateJournalEntry } from "@/lib/sanity/journal";
+import type { JOURNAL_ENTRY_BY_ID_QUERYResult } from "@/sanity/sanity.types";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-interface JournalEntry {
-  _id: string;
-  title?: string;
-  content: any[];
-  mood: string;
-  createdAt: string;
-  userId: string;
-  aiGeneratedCategory?: {
-    title: string;
-    color?: string;
-  };
-}
-
 export default function EditEntryScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const [entry, setEntry] = useState<JournalEntry | null>(null);
+  const [entry, setEntry] = useState<JOURNAL_ENTRY_BY_ID_QUERYResult>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,7 +22,7 @@ export default function EditEntryScreen() {
       try {
         const fetchedEntry = await getJournalEntryById(id);
         if (fetchedEntry) {
-          setEntry(fetchedEntry as JournalEntry);
+          setEntry(fetchedEntry);
         } else {
           setError("Entry not found");
         }
@@ -113,7 +101,8 @@ export default function EditEntryScreen() {
   }
 
   // Extract text content from portable text blocks
-  const extractTextContent = (content: any[]): string => {
+  const extractTextContent = (content: any[] | null): string => {
+    if (!content) return "";
     return content
       .filter((block) => block._type === "block")
       .map((block) =>
@@ -148,11 +137,11 @@ export default function EditEntryScreen() {
 
   // Pre-fill form data
   const initialData = {
-    title: entry.title || "",
+    title: entry.title ?? "",
     content: extractTextContent(entry.content),
-    mood: entry.mood,
-    images: extractImages(entry.content),
-    userId: entry.userId,
+    mood: entry.mood ?? "neutral",
+    images: extractImages(entry.content ?? []),
+    userId: entry.userId ?? "",
   };
 
   return (

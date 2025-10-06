@@ -1,5 +1,6 @@
 import { getMoodConfig } from "@/lib/constants/moods";
 import { urlFor } from "@/lib/sanity/client";
+import type { JOURNAL_ENTRY_BY_ID_QUERYResult } from "@/sanity/sanity.types";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { PortableText } from "@portabletext/react-native";
 import { Image } from "expo-image";
@@ -7,29 +8,22 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 interface JournalEntryDisplayProps {
-  entry: {
-    _id: string;
-    title?: string;
-    content: any[]; // Portable Text content
-    mood: string;
-    createdAt: string;
-    aiGeneratedCategory?: {
-      title: string;
-      color?: string;
-    };
-  };
+  entry: NonNullable<JOURNAL_ENTRY_BY_ID_QUERYResult>;
 }
 
 export default function JournalEntryDisplay({
   entry,
 }: JournalEntryDisplayProps) {
-  const moodConfig = getMoodConfig(entry.mood);
-  const date = new Date(entry.createdAt).toLocaleDateString("en-US", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  const moodConfig = getMoodConfig(entry.mood ?? "neutral");
+  const date = new Date(entry.createdAt ?? new Date()).toLocaleDateString(
+    "en-US",
+    {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }
+  );
 
   // Custom components for Portable Text rendering
   const portableTextComponents = {
@@ -152,8 +146,8 @@ export default function JournalEntryDisplay({
       {/* Content */}
       <View style={styles.contentContainer}>
         <PortableText
-          value={entry.content}
-          components={portableTextComponents}
+          value={entry.content ?? []}
+          components={portableTextComponents as any}
         />
       </View>
     </View>

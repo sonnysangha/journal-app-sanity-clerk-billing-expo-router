@@ -5,11 +5,8 @@ import type {
 } from "../../sanity/sanity.types";
 import { sanityClient } from "./client";
 
-interface Category {
-  _id: string;
-  title: string;
-  color?: string;
-}
+// Use generated types from TypeGen
+type Category = ALL_CATEGORIES_QUERYResult[0];
 
 // GROQ Queries - defined as module-level constants for Sanity typegen
 export const ALL_CATEGORIES_QUERY = defineQuery(`*[
@@ -45,7 +42,7 @@ export const fetchCategories =
 export const createCategory = async (category: {
   title: string;
   color?: string;
-}): Promise<Category> => {
+}): Promise<NonNullable<Category>> => {
   try {
     const newCategory = {
       _type: "category",
@@ -54,7 +51,7 @@ export const createCategory = async (category: {
     };
 
     const result = await sanityClient.create(newCategory);
-    return result as Category;
+    return result as NonNullable<Category>;
   } catch (error) {
     console.error("Error creating category:", error);
     throw error;
@@ -65,10 +62,10 @@ export const createCategory = async (category: {
 export const updateCategory = async (
   categoryId: string,
   updates: Partial<{ title: string; color: string }>
-): Promise<Category> => {
+): Promise<NonNullable<Category>> => {
   try {
     const result = await sanityClient.patch(categoryId).set(updates).commit();
-    return result as unknown as Category;
+    return result as unknown as NonNullable<Category>;
   } catch (error) {
     console.error("Error updating category:", error);
     throw error;

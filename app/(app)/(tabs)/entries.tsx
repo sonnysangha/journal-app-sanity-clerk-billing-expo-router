@@ -1,6 +1,7 @@
 import CreateEntryButton from "@/components/CreateEntryButton";
 import { getMoodConfig } from "@/lib/constants/moods";
 import { fetchJournalEntries } from "@/lib/sanity/journal";
+import type { USER_JOURNAL_ENTRIES_QUERYResult } from "@/sanity/sanity.types";
 import { useUser } from "@clerk/clerk-expo";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { router } from "expo-router";
@@ -16,17 +17,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { View } from "tamagui";
 
-interface JournalEntry {
-  _id: string;
-  title?: string;
-  content: any[];
-  mood: string;
-  createdAt: string;
-  aiGeneratedCategory?: {
-    title: string;
-    color?: string;
-  };
-}
+type JournalEntry = USER_JOURNAL_ENTRIES_QUERYResult[0];
 
 interface GroupedEntries {
   [date: string]: JournalEntry[];
@@ -35,7 +26,7 @@ interface GroupedEntries {
 export default function EntriesScreen() {
   const { user } = useUser();
   const insets = useSafeAreaInsets();
-  const [entries, setEntries] = useState<JournalEntry[]>([]);
+  const [entries, setEntries] = useState<USER_JOURNAL_ENTRIES_QUERYResult>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -64,9 +55,11 @@ export default function EntriesScreen() {
   };
 
   // Group entries by date
-  const groupEntriesByDate = (entries: JournalEntry[]): GroupedEntries => {
+  const groupEntriesByDate = (
+    entries: USER_JOURNAL_ENTRIES_QUERYResult
+  ): GroupedEntries => {
     return entries.reduce((groups: GroupedEntries, entry) => {
-      const date = new Date(entry.createdAt).toDateString();
+      const date = new Date(entry.createdAt ?? new Date()).toDateString();
       if (!groups[date]) {
         groups[date] = [];
       }
@@ -128,10 +121,12 @@ export default function EntriesScreen() {
             </Text>
 
             {dayEntries.map((entry) => {
-              const moodConfig = getMoodConfig(entry.mood);
+              const moodConfig = getMoodConfig(entry.mood ?? "neutral");
+              const firstBlock = entry.content?.[0];
               const preview =
-                entry.content?.[0]?.children?.[0]?.text?.slice(0, 100) ||
-                "No content";
+                (firstBlock && "children" in firstBlock
+                  ? firstBlock.children?.[0]?.text?.slice(0, 100)
+                  : null) ?? "No content";
 
               return (
                 <View key={entry._id} style={styles.entryCardContainer}>
@@ -141,14 +136,13 @@ export default function EntriesScreen() {
                   >
                     <View style={styles.entryHeader}>
                       <Text style={styles.entryTitle}>
-                        {entry.title ||
-                          new Date(entry.createdAt).toLocaleTimeString(
-                            "en-US",
-                            {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            }
-                          )}
+                        {entry.title ??
+                          new Date(
+                            entry.createdAt ?? new Date()
+                          ).toLocaleTimeString("en-US", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
                       </Text>
                       <View style={styles.entryActions}>
                         <MaterialIcons
