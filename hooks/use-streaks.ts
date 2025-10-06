@@ -5,6 +5,7 @@ import {
   getStreakStatusMessage,
   isStreakActive,
 } from "@/lib/utils/streaks";
+import type { USER_JOURNAL_ENTRIES_QUERYResult } from "@/sanity/sanity.types";
 import { useUser } from "@clerk/clerk-expo";
 import { useCallback, useEffect, useState } from "react";
 
@@ -35,7 +36,7 @@ const initialStreakData = {
 export const useStreaks = (): UseStreaksReturn => {
   const { user } = useUser();
   const [streakData, setStreakData] = useState(initialStreakData);
-  const [entries, setEntries] = useState<any[]>([]);
+  const [entries, setEntries] = useState<USER_JOURNAL_ENTRIES_QUERYResult>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,7 +53,15 @@ export const useStreaks = (): UseStreaksReturn => {
       const journalEntries = await fetchJournalEntries(user.id);
       setEntries(journalEntries);
 
-      const calculatedStreaks = calculateStreaks(journalEntries);
+      // Map to the minimal type needed for streak calculations
+      const entriesForStreaks = journalEntries
+        .filter((entry) => entry._id && entry.createdAt)
+        .map((entry) => ({
+          _id: entry._id,
+          createdAt: entry.createdAt!,
+        }));
+
+      const calculatedStreaks = calculateStreaks(entriesForStreaks);
       setStreakData(calculatedStreaks);
     } catch (err) {
       const errorMessage =
@@ -68,8 +77,15 @@ export const useStreaks = (): UseStreaksReturn => {
     loadStreakData();
   }, [loadStreakData]);
 
-  // Calculate derived values using useMemo for performance
-  const isActive = isStreakActive(entries);
+  // Calculate derived values
+  const entriesForStreaks = entries
+    .filter((entry) => entry._id && entry.createdAt)
+    .map((entry) => ({
+      _id: entry._id,
+      createdAt: entry.createdAt!,
+    }));
+
+  const isActive = isStreakActive(entriesForStreaks);
   const statusMessage = getStreakStatusMessage(streakData);
   const { daysUntil: daysUntilNextMilestone, milestone: nextMilestone } =
     getDaysUntilNextMilestone(streakData.currentStreak);
