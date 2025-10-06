@@ -1,3 +1,4 @@
+import CreateEntryButton from "@/components/CreateEntryButton";
 import ParallaxScrollView from "@/components/parallax-scroll-view";
 import { Image } from "expo-image";
 import { Link } from "expo-router";
@@ -6,39 +7,43 @@ import { Button, H1, H5, H6, Text, View } from "tamagui";
 
 export default function HomeScreen() {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
-      headerImage={
-        <Image
-          source={require("@/assets/images/partial-react-logo.png")}
-          style={styles.reactLogo}
-        />
-      }
-    >
-      <H1>Welcome!</H1>
-      <H5>To Journal.ai!</H5>
+    <View style={{ flex: 1 }}>
+      <ParallaxScrollView
+        headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
+        headerImage={
+          <Image
+            source={require("@/assets/images/partial-react-logo.png")}
+            style={styles.reactLogo}
+          />
+        }
+      >
+        <H1>Welcome!</H1>
+        <H5>To Journal.ai!</H5>
 
-      <View>
-        <Text marginBlockEnd={16}>
-          Journal.ai is your AI-powered journal assistant. It helps you track
-          your mood, thoughts, and feelings.
-        </Text>
+        <View>
+          <Text marginBlockEnd={16}>
+            Journal.ai is your AI-powered journal assistant. It helps you track
+            your mood, thoughts, and feelings.
+          </Text>
 
-        {/* Divider */}
-        <View style={styles.divider} />
+          {/* Divider */}
+          <View style={styles.divider} />
 
-        <Text marginBlockEnd={8}>From Sonny Sangha</Text>
-        <H6>#PAPAFAM</H6>
-      </View>
+          <Text marginBlockEnd={8}>From Sonny Sangha</Text>
+          <H6>#PAPAFAM</H6>
+        </View>
 
-      <Link href="https://www.youtube.com/sonnysangha" asChild>
-        <Button theme="blue">Watch the YouTube Video</Button>
-      </Link>
+        <Link href="https://www.youtube.com/sonnysangha" asChild>
+          <Button theme="blue">Watch the YouTube Video</Button>
+        </Link>
 
-      <Link href="https://www.papareact.com/journal-ai-form" asChild>
-        <Button theme="red">Get the code here</Button>
-      </Link>
-    </ParallaxScrollView>
+        <Link href="https://www.papareact.com/journal-ai-form" asChild>
+          <Button theme="red">Get the code here</Button>
+        </Link>
+      </ParallaxScrollView>
+
+      <CreateEntryButton />
+    </View>
   );
 }
 

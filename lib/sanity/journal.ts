@@ -1,0 +1,186 @@
+import { sanityClient } from "./client";
+import { uploadImageToSanity } from "./images";
+
+interface JournalEntryInput {
+  title?: string;
+  content: string;
+  images: { uri: string; caption?: string; alt?: string }[];
+  mood: string;
+  userId: string;
+}
+
+interface JournalEntry {
+  _id: string;
+  title?: string;
+  content: any[];
+  mood: string;
+  createdAt: string;
+  aiGeneratedCategory?: {
+    title: string;
+    color?: string;
+  };
+}
+
+// Helper function to create journal entry in Sanity
+export const createJournalEntry = async (entry: JournalEntryInput) => {
+  try {
+    // Upload all images first
+    const uploadedImages = await Promise.all(
+      entry.images.map(async (img) => {
+        const asset = await uploadImageToSanity(img.uri);
+        return {
+          _type: "image",
+          asset: {
+            _type: "reference",
+            _ref: asset._id,
+          },
+          alt: img.alt || "Journal entry image",
+          caption: img.caption || "",
+        };
+      })
+    );
+
+    // Create content blocks - mix text and images
+    const contentBlocks = [
+      {
+        _type: "block",
+        _key: "content-block",
+        style: "normal",
+        children: [
+          {
+            _type: "span",
+            _key: "content-span",
+            text: entry.content,
+            marks: [],
+          },
+        ],
+        markDefs: [],
+      },
+      ...uploadedImages.map((img, index) => ({
+        ...img,
+        _key: `image-${index}`,
+      })),
+    ];
+
+    // Create the journal entry document
+    const journalEntry = {
+      _type: "journalEntry",
+      title: entry.title,
+      content: contentBlocks,
+      mood: entry.mood,
+      userId: entry.userId,
+      createdAt: new Date().toISOString(),
+    };
+
+    // Save to Sanity
+    const result = await sanityClient.create(journalEntry);
+    return result;
+  } catch (error) {
+    console.error("Error creating journal entry:", error);
+    throw error;
+  }
+};
+
+// Helper function to fetch user's journal entries
+export const fetchJournalEntries = async (
+  userId: string
+): Promise<JournalEntry[]> => {
+  try {
+    const query = `*[
+      _type == "journalEntry" 
+      && userId == $userId
+    ] | order(createdAt desc) {
+      _id,
+      title,
+      content,
+      mood,
+      createdAt,
+      aiGeneratedCategory->{
+        title,
+        color
+      }
+    }`;
+
+    const entries = await sanityClient.fetch(query, { userId });
+    return entries;
+  } catch (error) {
+    console.error("Error fetching journal entries:", error);
+    throw error;
+  }
+};
+
+// Helper function to update journal entry
+export const updateJournalEntry = async (
+  entryId: string,
+  updates: Partial<JournalEntryInput>
+) => {
+  try {
+    // If content is being updated, convert it to blocks
+    const updateData: any = { ...updates };
+
+    if (updates.content) {
+      updateData.content = [
+        {
+          _type: "block",
+          _key: "updated-content-block",
+          style: "normal",
+          children: [
+            {
+              _type: "span",
+              _key: "updated-content-span",
+              text: updates.content,
+              marks: [],
+            },
+          ],
+          markDefs: [],
+        },
+      ];
+    }
+
+    const result = await sanityClient.patch(entryId).set(updateData).commit();
+    return result;
+  } catch (error) {
+    console.error("Error updating journal entry:", error);
+    throw error;
+  }
+};
+
+// Helper function to delete journal entry
+export const deleteJournalEntry = async (entryId: string) => {
+  try {
+    const result = await sanityClient.delete(entryId);
+    return result;
+  } catch (error) {
+    console.error("Error deleting journal entry:", error);
+    throw error;
+  }
+};
+
+// Helper function to get journal entry by ID
+export const getJournalEntryById = async (
+  entryId: string
+): Promise<JournalEntry | null> => {
+  try {
+    const query = `*[
+      _type == "journalEntry" 
+      && _id == $entryId
+    ][0]{
+      _id,
+      title,
+      content,
+      mood,
+      createdAt,
+      userId,
+      aiGeneratedCategory->{
+        title,
+        color
+      }
+    }`;
+
+    const entry = await sanityClient.fetch(query, { entryId });
+    return entry;
+  } catch (error) {
+    console.error("Error fetching journal entry:", error);
+    throw error;
+  }
+};

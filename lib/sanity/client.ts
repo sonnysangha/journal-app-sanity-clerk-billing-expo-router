@@ -1,0 +1,20 @@
+import { createClient } from "@sanity/client";
+import imageUrlBuilder from "@sanity/image-url";
+import type { SanityImageSource } from "@sanity/image-url/lib/types/types";
+
+// Initialize Sanity client
+export const sanityClient = createClient({
+  projectId: "ybgfg3ak", // Your project ID from sanity.config.ts
+  dataset: "production",
+  useCdn: false, // Set to false for write operations
+  apiVersion: "2024-01-01",
+  token: process.env.EXPO_PUBLIC_SANITY_TOKEN, // You'll need to add this
+});
+
+// Create image URL builder using the official Sanity package
+const builder = imageUrlBuilder(sanityClient);
+
+// Export the official urlFor function
+export function urlFor(source: SanityImageSource) {
+  return builder.image(source);
+}
