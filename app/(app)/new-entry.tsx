@@ -1,11 +1,13 @@
 import JournalEntryForm from "@/components/JournalEntryForm";
 import { createJournalEntry } from "@/lib/sanity/journal";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React from "react";
 import { Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function NewEntryScreen() {
+  const params = useLocalSearchParams();
+  const { promptTitle, promptText, suggestedMood } = params;
   const handleSave = async (entry: {
     title?: string;
     content: string;
@@ -37,9 +39,24 @@ export default function NewEntryScreen() {
     );
   };
 
+  // Build initial data if a prompt was provided
+  const initialData = promptText
+    ? {
+        title: typeof promptTitle === "string" ? promptTitle : "",
+        content: typeof promptText === "string" ? promptText : "",
+        mood: typeof suggestedMood === "string" ? suggestedMood : "",
+        images: [],
+        userId: "",
+      }
+    : undefined;
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#ffffff" }}>
-      <JournalEntryForm onSave={handleSave} onCancel={handleCancel} />
+      <JournalEntryForm
+        onSave={handleSave}
+        onCancel={handleCancel}
+        initialData={initialData}
+      />
     </SafeAreaView>
   );
 }

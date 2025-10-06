@@ -1,3 +1,8 @@
+import { defineQuery } from "groq";
+import type {
+  ALL_CATEGORIES_QUERYResult,
+  CATEGORY_BY_ID_QUERYResult,
+} from "../../sanity/sanity.types";
 import { sanityClient } from "./client";
 
 interface Category {
@@ -6,24 +11,35 @@ interface Category {
   color?: string;
 }
 
-// Helper function to fetch all categories
-export const fetchCategories = async (): Promise<Category[]> => {
-  try {
-    const query = `*[
-      _type == "category"
-    ] | order(title asc) {
-      _id,
-      title,
-      color
-    }`;
+// GROQ Queries - defined as module-level constants for Sanity typegen
+export const ALL_CATEGORIES_QUERY = defineQuery(`*[
+  _type == "category"
+] | order(title asc) {
+  _id,
+  title,
+  color
+}`);
 
-    const categories = await sanityClient.fetch(query);
-    return categories;
-  } catch (error) {
-    console.error("Error fetching categories:", error);
-    throw error;
-  }
-};
+export const CATEGORY_BY_ID_QUERY = defineQuery(`*[
+  _type == "category" 
+  && _id == $categoryId
+][0]{
+  _id,
+  title,
+  color
+}`);
+
+// Helper function to fetch all categories
+export const fetchCategories =
+  async (): Promise<ALL_CATEGORIES_QUERYResult> => {
+    try {
+      const categories = await sanityClient.fetch(ALL_CATEGORIES_QUERY);
+      return categories;
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      throw error;
+    }
+  };
 
 // Helper function to create a new category
 export const createCategory = async (category: {
@@ -38,7 +54,7 @@ export const createCategory = async (category: {
     };
 
     const result = await sanityClient.create(newCategory);
-    return result;
+    return result as Category;
   } catch (error) {
     console.error("Error creating category:", error);
     throw error;
@@ -51,11 +67,8 @@ export const updateCategory = async (
   updates: Partial<{ title: string; color: string }>
 ): Promise<Category> => {
   try {
-    const result = await sanityClient
-      .patch(categoryId)
-      .set(updates)
-      .commit();
-    return result;
+    const result = await sanityClient.patch(categoryId).set(updates).commit();
+    return result as unknown as Category;
   } catch (error) {
     console.error("Error updating category:", error);
     throw error;
@@ -74,18 +87,13 @@ export const deleteCategory = async (categoryId: string) => {
 };
 
 // Helper function to get category by ID
-export const getCategoryById = async (categoryId: string): Promise<Category | null> => {
+export const getCategoryById = async (
+  categoryId: string
+): Promise<CATEGORY_BY_ID_QUERYResult> => {
   try {
-    const query = `*[
-      _type == "category" 
-      && _id == $categoryId
-    ][0]{
-      _id,
-      title,
-      color
-    }`;
-
-    const category = await sanityClient.fetch(query, { categoryId });
+    const category = await sanityClient.fetch(CATEGORY_BY_ID_QUERY, {
+      categoryId,
+    });
     return category;
   } catch (error) {
     console.error("Error fetching category:", error);

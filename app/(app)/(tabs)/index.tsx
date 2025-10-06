@@ -1,3 +1,4 @@
+import DailyPromptCards from "@/components/DailyPromptCards";
 import Logo from "@/components/Logo";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useStreaks } from "@/hooks/use-streaks";
@@ -238,6 +239,9 @@ export default function HomeScreen() {
             </YStack>
           </YStack>
         )}
+
+        {/* Daily Prompts Section */}
+        <DailyPromptCards />
 
         {/* Action Buttons */}
         <YStack gap="$3" mb="$6">

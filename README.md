@@ -25,6 +25,26 @@ In the output, you'll find options to open the app in a
 
 You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
+## Features
+
+### Daily Prompts
+
+This app includes a **Daily Prompts** feature that displays inspiring journal entry starters on the home screen as swipeable cards.
+
+- **Admin-managed**: Create and manage prompts via Sanity Studio
+- **Weighted random selection**: Control which prompts appear more frequently
+- **Pre-filled entries**: Tap a prompt to start a journal entry with suggested content
+- **Sample data included**: Import 15 ready-to-use prompts to get started
+
+For detailed documentation, see [sanity/DAILY-PROMPTS.md](sanity/DAILY-PROMPTS.md).
+
+To import sample prompts:
+
+```bash
+cd sanity
+npx sanity dataset import ../sample_data/sample-daily-prompts.ndjson development
+```
+
 ## Get a fresh project
 
 When you're ready, run:

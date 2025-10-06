@@ -1,3 +1,8 @@
+import { defineQuery } from "groq";
+import type {
+  JOURNAL_ENTRY_BY_ID_QUERYResult,
+  USER_JOURNAL_ENTRIES_QUERYResult,
+} from "../../sanity/sanity.types";
 import { sanityClient } from "./client";
 import { uploadImageToSanity } from "./images";
 
@@ -9,17 +14,37 @@ interface JournalEntryInput {
   userId: string;
 }
 
-interface JournalEntry {
-  _id: string;
-  title?: string;
-  content: any[];
-  mood: string;
-  createdAt: string;
-  aiGeneratedCategory?: {
-    title: string;
-    color?: string;
-  };
-}
+// GROQ Queries - defined as module-level constants for Sanity typegen
+export const USER_JOURNAL_ENTRIES_QUERY = defineQuery(`*[
+  _type == "journalEntry" 
+  && userId == $userId
+] | order(createdAt desc) {
+  _id,
+  title,
+  content,
+  mood,
+  createdAt,
+  aiGeneratedCategory->{
+    title,
+    color
+  }
+}`);
+
+export const JOURNAL_ENTRY_BY_ID_QUERY = defineQuery(`*[
+  _type == "journalEntry" 
+  && _id == $entryId
+][0]{
+  _id,
+  title,
+  content,
+  mood,
+  createdAt,
+  userId,
+  aiGeneratedCategory->{
+    title,
+    color
+  }
+}`);
 
 // Helper function to create journal entry in Sanity
 export const createJournalEntry = async (entry: JournalEntryInput) => {
@@ -84,24 +109,11 @@ export const createJournalEntry = async (entry: JournalEntryInput) => {
 // Helper function to fetch user's journal entries
 export const fetchJournalEntries = async (
   userId: string
-): Promise<JournalEntry[]> => {
+): Promise<USER_JOURNAL_ENTRIES_QUERYResult> => {
   try {
-    const query = `*[
-      _type == "journalEntry" 
-      && userId == $userId
-    ] | order(createdAt desc) {
-      _id,
-      title,
-      content,
-      mood,
-      createdAt,
-      aiGeneratedCategory->{
-        title,
-        color
-      }
-    }`;
-
-    const entries = await sanityClient.fetch(query, { userId });
+    const entries = await sanityClient.fetch(USER_JOURNAL_ENTRIES_QUERY, {
+      userId,
+    });
     return entries;
   } catch (error) {
     console.error("Error fetching journal entries:", error);
@@ -159,25 +171,11 @@ export const deleteJournalEntry = async (entryId: string) => {
 // Helper function to get journal entry by ID
 export const getJournalEntryById = async (
   entryId: string
-): Promise<JournalEntry | null> => {
+): Promise<JOURNAL_ENTRY_BY_ID_QUERYResult> => {
   try {
-    const query = `*[
-      _type == "journalEntry" 
-      && _id == $entryId
-    ][0]{
-      _id,
-      title,
-      content,
-      mood,
-      createdAt,
-      userId,
-      aiGeneratedCategory->{
-        title,
-        color
-      }
-    }`;
-
-    const entry = await sanityClient.fetch(query, { entryId });
+    const entry = await sanityClient.fetch(JOURNAL_ENTRY_BY_ID_QUERY, {
+      entryId,
+    });
     return entry;
   } catch (error) {
     console.error("Error fetching journal entry:", error);
