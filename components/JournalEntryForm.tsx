@@ -1,3 +1,4 @@
+import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useUser } from "@clerk/clerk-expo";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
@@ -39,11 +40,21 @@ interface JournalEntryFormProps {
 }
 
 const MOOD_OPTIONS = [
-  { emoji: "😢", label: "Very Sad", value: "very-sad" },
-  { emoji: "😞", label: "Sad", value: "sad" },
-  { emoji: "😐", label: "Neutral", value: "neutral" },
-  { emoji: "😊", label: "Happy", value: "happy" },
-  { emoji: "😄", label: "Very Happy", value: "very-happy" },
+  {
+    icon: "face.dashed",
+    label: "Very Sad",
+    value: "very-sad",
+    color: "#ef4444",
+  },
+  { icon: "cloud.rain", label: "Sad", value: "sad", color: "#f97316" },
+  { icon: "circle", label: "Neutral", value: "neutral", color: "#6b7280" },
+  { icon: "sun.max", label: "Happy", value: "happy", color: "#22c55e" },
+  {
+    icon: "sparkles",
+    label: "Very Happy",
+    value: "very-happy",
+    color: "#eab308",
+  },
 ];
 
 export default function JournalEntryForm({
@@ -59,7 +70,6 @@ export default function JournalEntryForm({
   const [images, setImages] = useState<JournalImage[]>(
     initialData?.images || []
   );
-  const [currentImageCaption, setCurrentImageCaption] = useState("");
 
   // Request permissions on component mount
   React.useEffect(() => {
@@ -95,7 +105,7 @@ export default function JournalEntryForm({
         };
         setImages([...images, newImage]);
       }
-    } catch (error) {
+    } catch {
       Alert.alert("Error", "Failed to pick image. Please try again.");
     }
   };
@@ -125,7 +135,7 @@ export default function JournalEntryForm({
         };
         setImages([...images, newImage]);
       }
-    } catch (error) {
+    } catch {
       Alert.alert("Error", "Failed to take photo. Please try again.");
     }
   };
@@ -180,253 +190,282 @@ export default function JournalEntryForm({
     ]);
   };
 
+  const selectedMood = MOOD_OPTIONS.find((opt) => opt.value === mood);
+
   return (
-    <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
-      <View style={styles.form}>
-        {/* Title Input */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Title (Optional)</Text>
-          <TextInput
-            style={styles.titleInput}
-            value={title}
-            onChangeText={setTitle}
-            placeholder="Give your entry a title..."
-            maxLength={100}
-          />
-        </View>
+    <View style={styles.container}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.contentContainer}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header with date and mood */}
+        <View style={styles.header}>
+          <Text style={styles.date}>
+            {new Date().toLocaleDateString("en-US", {
+              weekday: "long",
+              month: "long",
+              day: "numeric",
+            })}
+          </Text>
 
-        {/* Content Input */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>What&apos;s on your mind? *</Text>
-          <TextInput
-            style={styles.contentInput}
-            value={content}
-            onChangeText={setContent}
-            placeholder="Write about your day, thoughts, feelings..."
-            multiline
-            textAlignVertical="top"
-          />
-        </View>
-
-        {/* Images Section */}
-        <View style={styles.inputGroup}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.label}>Images</Text>
-            <TouchableOpacity
-              style={styles.addImageButton}
-              onPress={showImageOptions}
-            >
-              <Text style={styles.addImageText}>+ Add Image</Text>
-            </TouchableOpacity>
-          </View>
-
-          {images.map((image, index) => (
-            <View key={index} style={styles.imageContainer}>
-              <Image
-                source={{ uri: image.uri }}
-                style={styles.image}
-                contentFit="cover"
-              />
-              <View style={styles.imageControls}>
-                <TextInput
-                  style={styles.captionInput}
-                  value={image.caption}
-                  onChangeText={(text) => updateImageCaption(index, text)}
-                  placeholder="Add a caption..."
-                />
-                <TouchableOpacity
-                  style={styles.removeButton}
-                  onPress={() => removeImage(index)}
-                >
-                  <Text style={styles.removeButtonText}>Remove</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          ))}
-        </View>
-
-        {/* Mood Selection */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>How are you feeling? *</Text>
-          <View style={styles.moodContainer}>
+          {/* Mood Selector */}
+          <View style={styles.moodBar}>
             {MOOD_OPTIONS.map((option) => (
               <TouchableOpacity
                 key={option.value}
                 style={[
-                  styles.moodOption,
-                  mood === option.value && styles.moodOptionSelected,
+                  styles.moodIcon,
+                  mood === option.value && styles.moodIconSelected,
                 ]}
                 onPress={() => setMood(option.value)}
               >
-                <Text style={styles.moodEmoji}>{option.emoji}</Text>
-                <Text style={styles.moodLabel}>{option.label}</Text>
+                <IconSymbol
+                  size={20}
+                  name={option.icon as any}
+                  color={mood === option.value ? option.color : "#9ca3af"}
+                />
               </TouchableOpacity>
             ))}
           </View>
         </View>
 
-        {/* Action Buttons */}
-        <View style={styles.buttonContainer}>
+        {/* Title Input - Minimal */}
+        <TextInput
+          style={styles.titleInput}
+          value={title}
+          onChangeText={setTitle}
+          placeholder="Title"
+          placeholderTextColor="#9ca3af"
+          maxLength={100}
+        />
+
+        {/* Content Input - Minimal */}
+        <TextInput
+          style={styles.contentInput}
+          value={content}
+          onChangeText={setContent}
+          placeholder="Start writing..."
+          placeholderTextColor="#d1d5db"
+          multiline
+          textAlignVertical="top"
+        />
+
+        {/* Images Section */}
+        {images.length > 0 && (
+          <View style={styles.imagesSection}>
+            {images.map((image, index) => (
+              <View key={index} style={styles.imageWrapper}>
+                <Image
+                  source={{ uri: image.uri }}
+                  style={styles.image}
+                  contentFit="cover"
+                />
+                <TouchableOpacity
+                  style={styles.removeImageButton}
+                  onPress={() => removeImage(index)}
+                >
+                  <IconSymbol size={16} name="xmark" color="white" />
+                </TouchableOpacity>
+                <TextInput
+                  style={styles.imageCaption}
+                  value={image.caption}
+                  onChangeText={(text) => updateImageCaption(index, text)}
+                  placeholder="Add caption..."
+                  placeholderTextColor="#9ca3af"
+                />
+              </View>
+            ))}
+          </View>
+        )}
+      </ScrollView>
+
+      {/* Bottom Toolbar */}
+      <View style={styles.toolbar}>
+        <View style={styles.toolbarLeft}>
+          <TouchableOpacity
+            style={styles.toolbarButton}
+            onPress={showImageOptions}
+          >
+            <IconSymbol size={22} name="photo" color="#6b7280" />
+          </TouchableOpacity>
+
+          {selectedMood && (
+            <View style={styles.selectedMoodIndicator}>
+              <IconSymbol
+                size={18}
+                name={selectedMood.icon as any}
+                color={selectedMood.color}
+              />
+              <Text style={styles.selectedMoodText}>{selectedMood.label}</Text>
+            </View>
+          )}
+        </View>
+
+        <View style={styles.toolbarRight}>
           <TouchableOpacity style={styles.cancelButton} onPress={onCancel}>
             <Text style={styles.cancelButtonText}>Cancel</Text>
           </TouchableOpacity>
+
           <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+            <IconSymbol size={18} name="checkmark" color="white" />
             <Text style={styles.saveButtonText}>
-              {isEditing ? "Update Entry" : "Save Entry"}
+              {isEditing ? "Update" : "Save"}
             </Text>
           </TouchableOpacity>
         </View>
       </View>
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "#ffffff",
   },
-  form: {
-    padding: 20,
+  scrollView: {
+    flex: 1,
   },
-  inputGroup: {
-    marginBottom: 24,
+  contentContainer: {
+    padding: 24,
+    paddingBottom: 100,
   },
-  label: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#333",
-    marginBottom: 8,
+  header: {
+    marginBottom: 32,
+  },
+  date: {
+    fontSize: 13,
+    color: "#9ca3af",
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
+    marginBottom: 16,
+  },
+  moodBar: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  moodIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#f9fafb",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  moodIconSelected: {
+    backgroundColor: "#f0f9ff",
+    borderWidth: 2,
+    borderColor: "#e0f2fe",
   },
   titleInput: {
-    backgroundColor: "white",
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: "#e1e5e9",
+    fontSize: 28,
+    fontWeight: "700",
+    color: "#1f2937",
+    marginBottom: 16,
+    padding: 0,
   },
   contentInput: {
-    backgroundColor: "white",
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: "#e1e5e9",
-    minHeight: 120,
+    fontSize: 17,
+    lineHeight: 28,
+    color: "#374151",
+    minHeight: 300,
+    padding: 0,
   },
-  sectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
+  imagesSection: {
+    marginTop: 24,
+    gap: 16,
   },
-  addImageButton: {
-    backgroundColor: "#007AFF",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-  addImageText: {
-    color: "white",
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  imageContainer: {
-    backgroundColor: "white",
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: "#e1e5e9",
+  imageWrapper: {
+    position: "relative",
   },
   image: {
     width: "100%",
-    height: 200,
-    borderRadius: 8,
-    marginBottom: 12,
-  },
-  imageControls: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  captionInput: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: "#e1e5e9",
-    borderRadius: 8,
-    padding: 8,
-    fontSize: 14,
-  },
-  removeButton: {
-    backgroundColor: "#FF3B30",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 6,
-  },
-  removeButtonText: {
-    color: "white",
-    fontSize: 12,
-    fontWeight: "600",
-  },
-  moodContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 12,
-  },
-  moodOption: {
-    backgroundColor: "white",
+    height: 240,
     borderRadius: 12,
-    padding: 16,
+  },
+  removeImageButton: {
+    position: "absolute",
+    top: 12,
+    right: 12,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    justifyContent: "center",
     alignItems: "center",
-    borderWidth: 2,
-    borderColor: "#e1e5e9",
-    minWidth: 80,
   },
-  moodOptionSelected: {
-    borderColor: "#007AFF",
-    backgroundColor: "#f0f8ff",
+  imageCaption: {
+    marginTop: 8,
+    fontSize: 14,
+    color: "#6b7280",
+    fontStyle: "italic",
   },
-  moodEmoji: {
-    fontSize: 24,
-    marginBottom: 4,
+  toolbar: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    backgroundColor: "#ffffff",
+    borderTopWidth: 1,
+    borderTopColor: "#f3f4f6",
   },
-  moodLabel: {
-    fontSize: 12,
+  toolbarLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+    flex: 1,
+  },
+  toolbarButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#f9fafb",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  selectedMoodIndicator: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: "#f9fafb",
+    borderRadius: 20,
+  },
+  selectedMoodText: {
+    fontSize: 13,
+    color: "#6b7280",
     fontWeight: "500",
-    textAlign: "center",
-    color: "#666",
   },
-  buttonContainer: {
+  toolbarRight: {
     flexDirection: "row",
     gap: 12,
-    marginTop: 20,
   },
   cancelButton: {
-    flex: 1,
-    backgroundColor: "#f8f9fa",
-    borderRadius: 12,
-    padding: 16,
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#e1e5e9",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
   },
   cancelButtonText: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "600",
-    color: "#666",
+    color: "#6b7280",
   },
   saveButton: {
-    flex: 1,
-    backgroundColor: "#007AFF",
-    borderRadius: 12,
-    padding: 16,
+    flexDirection: "row",
     alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    backgroundColor: "#3b82f6",
+    borderRadius: 20,
   },
   saveButtonText: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "600",
-    color: "white",
+    color: "#ffffff",
   },
 });

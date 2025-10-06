@@ -1,13 +1,8 @@
-import { SafeAreaView } from "react-native-safe-area-context";
+import React from "react";
 import { View } from "tamagui";
-import JournalListScreen from "../journal-list";
 
+// This tab is only used for the center plus button in the tab bar
+// It doesn't render any content - the plus button navigates to /new-entry
 export default function JournalTab() {
-  return (
-    <View bg="$background" style={{ flex: 1 }}>
-      <SafeAreaView style={{ flex: 1, backgroundColor: "#f8f9fa" }}>
-        <JournalListScreen />
-      </SafeAreaView>
-    </View>
-  );
+  return <View style={{ flex: 1 }} />;
 }

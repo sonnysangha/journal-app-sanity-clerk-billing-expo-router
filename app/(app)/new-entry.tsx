@@ -44,9 +44,8 @@ export default function NewEntryScreen() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#f8f9fa" }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#ffffff" }}>
       <JournalEntryForm onSave={handleSave} onCancel={handleCancel} />
-      {/* You could add a loading overlay here if needed */}
     </SafeAreaView>
   );
 }

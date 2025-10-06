@@ -94,8 +94,7 @@ export default function EditEntryScreen() {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
-        <Text style={styles.loadingText}>Loading entry...</Text>
+        <ActivityIndicator size="large" color="#3b82f6" />
       </View>
     );
   }
@@ -164,8 +163,8 @@ export default function EditEntryScreen() {
       />
       {saving && (
         <View style={styles.savingOverlay}>
-          <ActivityIndicator size="large" color="#007AFF" />
-          <Text style={styles.savingText}>Saving changes...</Text>
+          <ActivityIndicator size="large" color="#3b82f6" />
+          <Text style={styles.savingText}>Saving...</Text>
         </View>
       )}
     </View>
@@ -175,29 +174,30 @@ export default function EditEntryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#ffffff",
   },
   centerContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f8f9fa",
-    padding: 20,
+    backgroundColor: "#ffffff",
+    padding: 24,
   },
   loadingText: {
     marginTop: 16,
-    fontSize: 16,
-    color: "#666",
+    fontSize: 15,
+    color: "#6b7280",
   },
   errorTitle: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "600",
-    color: "#333",
+    color: "#1f2937",
     textAlign: "center",
     marginBottom: 8,
   },
   errorText: {
-    fontSize: 16,
-    color: "#666",
+    fontSize: 15,
+    color: "#6b7280",
     textAlign: "center",
     lineHeight: 24,
   },
@@ -207,13 +207,13 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "rgba(0,0,0,0.3)",
     justifyContent: "center",
     alignItems: "center",
   },
   savingText: {
     marginTop: 16,
-    fontSize: 16,
+    fontSize: 15,
     color: "white",
     fontWeight: "600",
   },

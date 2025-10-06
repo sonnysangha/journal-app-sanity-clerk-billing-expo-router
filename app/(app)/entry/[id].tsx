@@ -13,6 +13,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Button, XStack } from "tamagui";
 
 interface JournalEntry {
   _id: string;
@@ -60,8 +61,7 @@ export default function EntryDetailScreen() {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
-        <Text style={styles.loadingText}>Loading entry...</Text>
+        <ActivityIndicator size="large" color="#3b82f6" />
       </View>
     );
   }
@@ -143,20 +143,37 @@ export default function EntryDetailScreen() {
           </TouchableOpacity>
 
           {canEdit && (
-            <View style={styles.actionButtons}>
-              <TouchableOpacity style={styles.editButton} onPress={handleEdit}>
-                <Text style={styles.editButtonText}>Edit</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.deleteButton}
+            <XStack gap="$2">
+              <Button
+                size="$3"
+                borderWidth={1}
+                borderColor="$blue9"
+                bg="transparent"
+                color="$blue9"
+                pressStyle={{
+                  bg: "$blue2",
+                  borderColor: "$blue10",
+                }}
+                onPress={handleEdit}
+              >
+                Edit
+              </Button>
+              <Button
+                size="$3"
+                borderWidth={1}
+                borderColor="$red9"
+                bg="transparent"
+                color="$red9"
+                pressStyle={{
+                  bg: "$red2",
+                  borderColor: "$red10",
+                }}
                 onPress={handleDelete}
                 disabled={deleting}
               >
-                <Text style={styles.deleteButtonText}>
-                  {deleting ? "Deleting..." : "Delete"}
-                </Text>
-              </TouchableOpacity>
-            </View>
+                {deleting ? "Deleting..." : "Delete"}
+              </Button>
+            </XStack>
           )}
         </View>
 
@@ -169,86 +186,60 @@ export default function EntryDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "#ffffff",
   },
   contentContainer: {
-    padding: 20,
+    padding: 24,
   },
   centerContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f8f9fa",
-    padding: 20,
+    backgroundColor: "#ffffff",
+    padding: 24,
   },
   loadingText: {
     marginTop: 16,
-    fontSize: 16,
-    color: "#666",
+    fontSize: 15,
+    color: "#6b7280",
   },
   errorTitle: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "600",
-    color: "#333",
+    color: "#1f2937",
     textAlign: "center",
     marginBottom: 8,
   },
   errorText: {
-    fontSize: 16,
-    color: "#666",
+    fontSize: 15,
+    color: "#6b7280",
     textAlign: "center",
     lineHeight: 24,
     marginBottom: 24,
   },
   backButton: {
-    backgroundColor: "#007AFF",
+    backgroundColor: "#3b82f6",
     paddingHorizontal: 24,
     paddingVertical: 12,
-    borderRadius: 8,
+    borderRadius: 12,
   },
   backButtonText: {
     color: "white",
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "600",
   },
   headerActions: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: 32,
   },
   backButtonTop: {
     paddingVertical: 8,
   },
   backButtonTopText: {
-    color: "#007AFF",
-    fontSize: 16,
+    color: "#6b7280",
+    fontSize: 14,
     fontWeight: "500",
-  },
-  actionButtons: {
-    flexDirection: "row",
-    gap: 8,
-  },
-  editButton: {
-    backgroundColor: "#007AFF",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  editButtonText: {
-    color: "white",
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  deleteButton: {
-    backgroundColor: "#FF3B30",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  deleteButtonText: {
-    color: "white",
-    fontSize: 14,
-    fontWeight: "600",
   },
 });

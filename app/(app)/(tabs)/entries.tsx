@@ -12,6 +12,7 @@ import {
   Text,
   TouchableOpacity,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { View } from "tamagui";
 
 interface JournalEntry {
@@ -38,8 +39,9 @@ const MOOD_EMOJIS: Record<string, string> = {
   "very-happy": "😄",
 };
 
-export default function JournalListScreen() {
+export default function EntriesScreen() {
   const { user } = useUser();
+  const insets = useSafeAreaInsets();
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -60,6 +62,7 @@ export default function JournalListScreen() {
 
   useEffect(() => {
     loadEntries();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
   const onRefresh = () => {
@@ -117,7 +120,7 @@ export default function JournalListScreen() {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <ActivityIndicator size="large" color="#3b82f6" />
         <Text style={styles.loadingText}>Loading your journal entries...</Text>
       </View>
     );
@@ -141,7 +144,10 @@ export default function JournalListScreen() {
     <View bg="$background" style={styles.container}>
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={styles.contentContainer}
+        contentContainerStyle={[
+          styles.contentContainer,
+          { paddingTop: insets.top + 20 },
+        ]}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
@@ -233,43 +239,44 @@ export default function JournalListScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "#ffffff",
   },
   scrollView: {
     flex: 1,
   },
   contentContainer: {
-    padding: 20,
+    paddingHorizontal: 24,
     paddingBottom: 100, // Space for FAB
   },
   centerContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f8f9fa",
-    padding: 20,
+    backgroundColor: "#ffffff",
+    padding: 24,
   },
   title: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: "700",
-    color: "#333",
-    marginBottom: 20,
+    color: "#1f2937",
+    marginBottom: 24,
+    letterSpacing: -0.5,
   },
   loadingText: {
     marginTop: 16,
-    fontSize: 16,
-    color: "#666",
+    fontSize: 15,
+    color: "#6b7280",
   },
   emptyTitle: {
     fontSize: 24,
     fontWeight: "600",
-    color: "#333",
+    color: "#1f2937",
     textAlign: "center",
     marginBottom: 8,
   },
   emptySubtitle: {
-    fontSize: 16,
-    color: "#666",
+    fontSize: 15,
+    color: "#6b7280",
     textAlign: "center",
     lineHeight: 24,
   },
@@ -277,76 +284,78 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   dateHeader: {
-    fontSize: 18,
+    fontSize: 12,
     fontWeight: "600",
-    color: "#333",
-    marginBottom: 12,
-    paddingBottom: 8,
+    color: "#6b7280",
+    marginBottom: 24,
+    paddingBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#e1e5e9",
+    borderBottomColor: "#e5e7eb",
+    textTransform: "uppercase",
+    letterSpacing: 1,
   },
   entryCardContainer: {
-    marginBottom: 12,
+    marginBottom: 32,
+    paddingBottom: 32,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f3f4f6",
   },
   entryCard: {
-    backgroundColor: "white",
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    backgroundColor: "transparent",
   },
   entryHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 8,
+    alignItems: "flex-start",
+    marginBottom: 12,
   },
   entryTitle: {
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: "600",
-    color: "#333",
+    color: "#1f2937",
     flex: 1,
+    letterSpacing: -0.3,
   },
   entryActions: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 12,
+    marginLeft: 12,
   },
   moodEmoji: {
-    fontSize: 20,
+    fontSize: 24,
   },
   deleteButtonSmall: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: "#FF3B30",
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "#ef4444",
     justifyContent: "center",
     alignItems: "center",
   },
   deleteButtonSmallText: {
     color: "white",
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "600",
-    lineHeight: 16,
+    lineHeight: 18,
   },
   entryPreview: {
-    fontSize: 14,
-    color: "#666",
-    lineHeight: 20,
-    marginBottom: 8,
+    fontSize: 16,
+    color: "#6b7280",
+    lineHeight: 26,
+    marginBottom: 16,
   },
   categoryTag: {
     alignSelf: "flex-start",
-    paddingHorizontal: 8,
+    paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 8,
+    borderRadius: 6,
   },
   categoryText: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: "600",
     color: "white",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
 });
