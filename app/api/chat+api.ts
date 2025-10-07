@@ -16,8 +16,6 @@ export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json();
   const userId = req.headers.get("x-user-id");
 
-  console.log(userId);
-
   if (!userId) {
     return new Response("Unauthorized", { status: 401 });
   }
@@ -189,10 +187,6 @@ Remember: Your access to their journal is a powerful tool for providing personal
 
             // Format entries for the AI to understand
             const formattedEntries = entries.map((entry) => {
-              console.log(
-                `Processing entry ${entry._id} from ${entry.createdAt}`
-              );
-
               // Extract text content from blocks
               let content = "No content";
               if (entry.content && entry.content.length > 0) {
@@ -217,10 +211,6 @@ Remember: Your access to their journal is a powerful tool for providing personal
                 category: entry.aiGeneratedCategory?.title,
               };
             });
-
-            console.log(
-              `Successfully formatted ${formattedEntries.length} entries`
-            );
 
             return {
               count: formattedEntries.length,
