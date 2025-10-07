@@ -108,13 +108,6 @@ export default function EntriesScreen() {
     }
   );
 
-  // Debug: Log grouped entries
-  console.log("Grouped entries by date:", Object.keys(groupedEntries));
-  console.log(
-    "Sorted dates:",
-    sortedGroupedEntries.map(([date]) => date)
-  );
-
   return (
     <View bg="$background" style={styles.container}>
       <ScrollView
