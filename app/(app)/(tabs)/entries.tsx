@@ -54,16 +54,22 @@ export default function EntriesScreen() {
     loadEntries();
   };
 
-  // Group entries by date
+  // Group entries by date (using UTC to match Sanity timestamps)
   const groupEntriesByDate = (
     entries: USER_JOURNAL_ENTRIES_QUERYResult
   ): GroupedEntries => {
     return entries.reduce((groups: GroupedEntries, entry) => {
-      const date = new Date(entry.createdAt ?? new Date()).toDateString();
-      if (!groups[date]) {
-        groups[date] = [];
+      // Use UTC date components to match the date stored in Sanity
+      const dateObj = new Date(entry.createdAt ?? new Date());
+      const year = dateObj.getUTCFullYear();
+      const month = String(dateObj.getUTCMonth() + 1).padStart(2, "0");
+      const day = String(dateObj.getUTCDate()).padStart(2, "0");
+      const dateKey = `${year}-${month}-${day}`;
+
+      if (!groups[dateKey]) {
+        groups[dateKey] = [];
       }
-      groups[date].push(entry);
+      groups[dateKey].push(entry);
       return groups;
     }, {});
   };
@@ -95,6 +101,20 @@ export default function EntriesScreen() {
 
   const groupedEntries = groupEntriesByDate(entries);
 
+  // Sort grouped entries by date (newest first)
+  const sortedGroupedEntries = Object.entries(groupedEntries).sort(
+    ([dateA], [dateB]) => {
+      return new Date(dateB).getTime() - new Date(dateA).getTime();
+    }
+  );
+
+  // Debug: Log grouped entries
+  console.log("Grouped entries by date:", Object.keys(groupedEntries));
+  console.log(
+    "Sorted dates:",
+    sortedGroupedEntries.map(([date]) => date)
+  );
+
   return (
     <View bg="$background" style={styles.container}>
       <ScrollView
@@ -109,84 +129,94 @@ export default function EntriesScreen() {
       >
         <Text style={styles.title}>Your Journal</Text>
 
-        {Object.entries(groupedEntries).map(([date, dayEntries]) => (
-          <View key={date} style={styles.dayGroup}>
-            <Text style={styles.dateHeader}>
-              {new Date(date).toLocaleDateString("en-US", {
-                weekday: "long",
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
-            </Text>
+        {sortedGroupedEntries.map(([date, dayEntries]) => {
+          // Sort entries within the day by createdAt (newest first)
+          const sortedDayEntries = [...dayEntries].sort(
+            (a, b) =>
+              new Date(b.createdAt ?? new Date()).getTime() -
+              new Date(a.createdAt ?? new Date()).getTime()
+          );
 
-            {dayEntries.map((entry) => {
-              const moodConfig = getMoodConfig(entry.mood ?? "neutral");
-              const firstBlock = entry.content?.[0];
-              const preview =
-                (firstBlock && "children" in firstBlock
-                  ? firstBlock.children?.[0]?.text?.slice(0, 100)
-                  : null) ?? "No content";
+          return (
+            <View key={date} style={styles.dayGroup}>
+              <Text style={styles.dateHeader}>
+                {new Date(date + "T00:00:00Z").toLocaleDateString("en-US", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                  timeZone: "UTC",
+                })}
+              </Text>
 
-              return (
-                <View key={entry._id} style={styles.entryCardContainer}>
-                  <TouchableOpacity
-                    style={styles.entryCard}
-                    onPress={() => handleEntryPress(entry._id)}
-                  >
-                    <View style={styles.entryHeader}>
-                      <Text style={styles.entryTitle}>
-                        {entry.title ??
-                          new Date(
-                            entry.createdAt ?? new Date()
-                          ).toLocaleTimeString("en-US", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
+              {sortedDayEntries.map((entry) => {
+                const moodConfig = getMoodConfig(entry.mood ?? "neutral");
+                const firstBlock = entry.content?.[0];
+                const preview =
+                  (firstBlock && "children" in firstBlock
+                    ? firstBlock.children?.[0]?.text?.slice(0, 100)
+                    : null) ?? "No content";
+
+                return (
+                  <View key={entry._id} style={styles.entryCardContainer}>
+                    <TouchableOpacity
+                      style={styles.entryCard}
+                      onPress={() => handleEntryPress(entry._id)}
+                    >
+                      <View style={styles.entryHeader}>
+                        <Text style={styles.entryTitle}>
+                          {entry.title ??
+                            new Date(
+                              entry.createdAt ?? new Date()
+                            ).toLocaleTimeString("en-US", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                        </Text>
+                        <View style={styles.entryActions}>
+                          <MaterialIcons
+                            size={20}
+                            name={moodConfig.icon as any}
+                            color={moodConfig.color}
+                          />
+                          <Text
+                            style={[
+                              styles.moodLabel,
+                              { color: moodConfig.color },
+                            ]}
+                          >
+                            {moodConfig.label}
+                          </Text>
+                        </View>
+                      </View>
+
+                      <Text style={styles.entryPreview}>
+                        {preview}
+                        {preview.length >= 100 ? "..." : ""}
                       </Text>
-                      <View style={styles.entryActions}>
-                        <MaterialIcons
-                          size={20}
-                          name={moodConfig.icon as any}
-                          color={moodConfig.color}
-                        />
-                        <Text
+
+                      {entry.aiGeneratedCategory && (
+                        <View
                           style={[
-                            styles.moodLabel,
-                            { color: moodConfig.color },
+                            styles.categoryTag,
+                            {
+                              backgroundColor:
+                                entry.aiGeneratedCategory.color || "#e1e5e9",
+                            },
                           ]}
                         >
-                          {moodConfig.label}
-                        </Text>
-                      </View>
-                    </View>
-
-                    <Text style={styles.entryPreview}>
-                      {preview}
-                      {preview.length >= 100 ? "..." : ""}
-                    </Text>
-
-                    {entry.aiGeneratedCategory && (
-                      <View
-                        style={[
-                          styles.categoryTag,
-                          {
-                            backgroundColor:
-                              entry.aiGeneratedCategory.color || "#e1e5e9",
-                          },
-                        ]}
-                      >
-                        <Text style={styles.categoryText}>
-                          {entry.aiGeneratedCategory.title}
-                        </Text>
-                      </View>
-                    )}
-                  </TouchableOpacity>
-                </View>
-              );
-            })}
-          </View>
-        ))}
+                          <Text style={styles.categoryText}>
+                            {entry.aiGeneratedCategory.title}
+                          </Text>
+                        </View>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                );
+              })}
+            </View>
+          );
+        })}
       </ScrollView>
     </View>
   );
