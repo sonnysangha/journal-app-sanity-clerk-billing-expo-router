@@ -27,6 +27,51 @@ You can start developing by editing the files inside the **app** directory. This
 
 ## Features
 
+### AI Therapist Chat 🤖
+
+An intelligent AI-powered therapeutic journaling assistant that provides personalized support based on your journal history.
+
+**Key Features:**
+
+- **Context-Aware Support**: AI proactively analyzes your journal entries to understand patterns and provide personalized insights
+- **Emotion Recognition**: Automatically fetches relevant entries when you express emotions (sad, anxious, happy, etc.)
+- **Pattern Analysis**: Identifies recurring themes, triggers, and emotional patterns across your journaling history
+- **Time-Based Queries**: Ask about specific periods ("How was I feeling last month?", "What happened in September?")
+- **Multi-Step Tool Calling**: AI uses sophisticated tools to gather and analyze your journal data before responding
+- **Real-time Streaming**: Responses stream in with visual indicators showing when AI is "thinking"
+
+**Setup:**
+
+1. **Environment Variables**: Add your OpenAI API key to `.env`:
+
+   ```bash
+   OPENAI_API_KEY=your_key_here
+   ```
+
+2. **Test with Sample Data**: Import 19 test journal entries to try the AI chat:
+
+   ```bash
+   cd sanity
+   npx sanity dataset import ../sample_data/test-journal-entries.ndjson production --replace
+   ```
+
+3. **Testing Guide**: See comprehensive testing instructions in [sample_data/AI-CHAT-TESTING.md](sample_data/AI-CHAT-TESTING.md)
+
+**Example Queries:**
+
+- "I'm feeling sad today" → AI analyzes recent entries to understand why
+- "What patterns do you see in my journal?" → Identifies themes and trends
+- "Tell me about my relationship with Alex" → References specific entries
+- "Am I making progress?" → Tracks growth over time
+
+**Technical Details:**
+
+- Built with AI SDK by Vercel for Expo
+- Streaming responses with `expo/fetch`
+- Custom tools for fetching journal entries (all entries or date-range specific)
+- GPT-4o model with enhanced therapeutic system prompt
+- Multi-step reasoning with up to 10 steps per conversation
+
 ### Daily Prompts
 
 This app includes a **Daily Prompts** feature that displays inspiring journal entry starters on the home screen as swipeable cards.
@@ -42,7 +87,7 @@ To import sample prompts:
 
 ```bash
 cd sanity
-npx sanity dataset import ../sample_data/sample-daily-prompts.ndjson development
+npx sanity dataset import ../sample_data/sample-daily-prompts.ndjson production
 ```
 
 ## Get a fresh project

@@ -1,40 +1,330 @@
-import React from "react";
-import { StyleSheet } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { H1, Text, View, YStack } from "tamagui";
+import { generateAPIUrl } from "@/utils";
+import { useChat } from "@ai-sdk/react";
+import { useUser } from "@clerk/clerk-expo";
+import { MaterialIcons } from "@expo/vector-icons";
+import { DefaultChatTransport } from "ai";
+import { fetch as expoFetch } from "expo/fetch";
+import React, { useRef, useState } from "react";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Button, Text, View, YStack } from "tamagui";
 
 export default function AIChatScreen() {
-  return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <YStack gap="$4" style={{ alignItems: "center" }} mt="$8">
-          <H1 fontSize="$8" fontWeight="600" color="$color12">
-            AI Chat
-          </H1>
-          <Text fontSize="$4" color="$color10" style={{ textAlign: "center" }}>
-            Chat with your AI journal assistant
-          </Text>
-          <Text
-            fontSize="$3"
-            color="$color9"
-            style={{ textAlign: "center" }}
-            mt="$4"
-          >
-            Coming soon...
-          </Text>
-        </YStack>
+  const [input, setInput] = useState("");
+  const scrollViewRef = useRef<ScrollView>(null);
+  const insets = useSafeAreaInsets();
+  const { user } = useUser();
+  const { messages, error, sendMessage } = useChat({
+    transport: new DefaultChatTransport({
+      fetch: expoFetch as typeof globalThis.fetch,
+      api: generateAPIUrl("/api/chat"),
+      headers: async () => ({
+        "x-user-id": user?.id || "",
+      }),
+    }),
+    onError: (error) => console.error(error, "ERROR"),
+  });
+
+  const handleSend = () => {
+    if (input.trim()) {
+      sendMessage({ text: input });
+      setInput("");
+      // Scroll to bottom after sending
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+      }, 100);
+    }
+  };
+
+  if (error) {
+    return (
+      <View style={[styles.container, { paddingTop: insets.top }]}>
+        <View style={styles.content}>
+          <Text color="$red10">{error.message}</Text>
+        </View>
       </View>
-    </SafeAreaView>
+    );
+  }
+
+  return (
+    <View style={[styles.container, { paddingTop: insets.top }]}>
+      <KeyboardAvoidingView
+        style={styles.keyboardAvoid}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={0}
+      >
+        <View style={styles.content}>
+          <ScrollView
+            ref={scrollViewRef}
+            style={styles.messagesContainer}
+            contentContainerStyle={styles.messagesContent}
+            showsVerticalScrollIndicator={false}
+            onContentSizeChange={() =>
+              scrollViewRef.current?.scrollToEnd({ animated: true })
+            }
+          >
+            {messages.length === 0 ? (
+              <YStack gap="$4" style={{ alignItems: "center" }} mt="$12">
+                <View style={styles.avatarContainer}>
+                  <View style={styles.avatar}>
+                    <MaterialIcons name="smart-toy" size={40} color="#666" />
+                  </View>
+                </View>
+                <Text
+                  fontSize="$6"
+                  fontWeight="600"
+                  color="$color11"
+                  style={{ textAlign: "center" }}
+                >
+                  Start a conversation
+                </Text>
+                <Text
+                  fontSize="$4"
+                  color="$color9"
+                  style={{ textAlign: "center", lineHeight: 22 }}
+                  px="$6"
+                >
+                  Ask me about journaling tips, mood tracking, or just chat
+                  about your day
+                </Text>
+              </YStack>
+            ) : (
+              messages.map((m) => (
+                <View
+                  key={m.id}
+                  style={[
+                    styles.messageContainer,
+                    m.role === "user"
+                      ? styles.userMessage
+                      : styles.assistantMessage,
+                  ]}
+                >
+                  {m.role === "assistant" && (
+                    <View style={styles.messageAvatar}>
+                      <MaterialIcons name="smart-toy" size={20} color="#666" />
+                    </View>
+                  )}
+                  <View
+                    style={[
+                      styles.messageBubble,
+                      m.role === "user"
+                        ? styles.userBubble
+                        : styles.assistantBubble,
+                    ]}
+                  >
+                    {m.parts.map((part, i) => {
+                      switch (part.type) {
+                        case "text":
+                          return (
+                            <Text
+                              key={`${m.id}-${i}`}
+                              fontSize="$4"
+                              color={m.role === "user" ? "white" : "$color12"}
+                              style={{ lineHeight: 22 }}
+                            >
+                              {part.text}
+                            </Text>
+                          );
+                        case "tool-getAllUserJournalEntries":
+                          return (
+                            <View
+                              key={`${m.id}-${i}`}
+                              style={styles.toolInvocation}
+                            >
+                              <MaterialIcons
+                                name="search"
+                                size={14}
+                                color="#666"
+                              />
+                              <Text fontSize="$2" color="$color9" ml="$2">
+                                Reviewing all journal entries...
+                              </Text>
+                            </View>
+                          );
+                        case "tool-getUserJournalEntries":
+                          return (
+                            <View
+                              key={`${m.id}-${i}`}
+                              style={styles.toolInvocation}
+                            >
+                              <MaterialIcons
+                                name="search"
+                                size={14}
+                                color="#666"
+                              />
+                              <Text fontSize="$2" color="$color9" ml="$2">
+                                Looking through journal entries...
+                              </Text>
+                            </View>
+                          );
+                        default:
+                          return null;
+                      }
+                    })}
+                  </View>
+                </View>
+              ))
+            )}
+          </ScrollView>
+
+          <View style={styles.inputContainer}>
+            <View style={styles.inputWrapper}>
+              <TextInput
+                style={styles.input}
+                placeholder="Type a message..."
+                placeholderTextColor="#999"
+                value={input}
+                onChange={(e) => setInput(e.nativeEvent.text)}
+                onSubmitEditing={handleSend}
+                onKeyPress={(e) => {
+                  // CMD+Enter (Mac) or Ctrl+Enter (Windows/Linux) to send
+                  const nativeEvent = e.nativeEvent as any;
+                  if (
+                    nativeEvent.key === "Enter" &&
+                    (nativeEvent.metaKey || nativeEvent.ctrlKey)
+                  ) {
+                    e.preventDefault();
+                    handleSend();
+                  }
+                }}
+                autoFocus={false}
+                multiline={Platform.OS === "web"}
+                maxLength={1000}
+                returnKeyType="send"
+                blurOnSubmit={Platform.OS !== "web"}
+              />
+              <Button
+                size="$3"
+                bg={input.trim() ? "#007AFF" : "#cccccc"}
+                color="white"
+                onPress={handleSend}
+                disabled={!input.trim()}
+                circular
+                style={styles.sendButton}
+                pressStyle={{ scale: 0.95 }}
+              >
+                ↑
+              </Button>
+            </View>
+          </View>
+        </View>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "#ffffff",
+  },
+  keyboardAvoid: {
+    flex: 1,
   },
   content: {
     flex: 1,
+  },
+  messagesContainer: {
+    flex: 1,
+  },
+  messagesContent: {
     paddingHorizontal: 16,
+    paddingVertical: 24,
+    flexGrow: 1,
+  },
+  avatarContainer: {
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  avatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "#f0f0f0",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  messageContainer: {
+    marginBottom: 16,
+    flexDirection: "row",
+    gap: 8,
+  },
+  messageAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#f0f0f0",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 4,
+  },
+  userMessage: {
+    justifyContent: "flex-end",
+  },
+  assistantMessage: {
+    justifyContent: "flex-start",
+  },
+  messageBubble: {
+    maxWidth: "80%",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 20,
+  },
+  userBubble: {
+    backgroundColor: "#007AFF",
+    borderBottomRightRadius: 4,
+  },
+  assistantBubble: {
+    backgroundColor: "#f0f0f0",
+    borderBottomLeftRadius: 4,
+  },
+  toolInvocation: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    backgroundColor: "#f8f9fa",
+    borderRadius: 12,
+    marginVertical: 4,
+    borderLeftWidth: 2,
+    borderLeftColor: "#666",
+  },
+  inputContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    paddingBottom: Platform.OS === "ios" ? 12 : 16,
+    borderTopWidth: 1,
+    borderTopColor: "#f0f0f0",
+    backgroundColor: "#ffffff",
+  },
+  inputWrapper: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    gap: 8,
+    backgroundColor: "#f5f5f5",
+    borderRadius: 24,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  input: {
+    flex: 1,
+    fontSize: 16,
+    color: "#000",
+    maxHeight: 100,
+    paddingVertical: 8,
+    lineHeight: 22,
+  },
+  sendButton: {
+    width: 36,
+    height: 36,
+    minHeight: 36,
+    padding: 0,
+    fontSize: 20,
   },
 });

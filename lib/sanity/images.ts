@@ -55,3 +55,4 @@ export const getJournalImageUrl = (asset: any, options?: {
     .auto("format")
     .url();
 };
+

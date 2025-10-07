@@ -2,7 +2,7 @@ import JournalEntryForm from "@/components/JournalEntryForm";
 import { createJournalEntry } from "@/lib/sanity/journal";
 import { router, useLocalSearchParams } from "expo-router";
 import React from "react";
-import { Alert } from "react-native";
+import { Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function NewEntryScreen() {
@@ -52,11 +52,17 @@ export default function NewEntryScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#ffffff" }}>
-      <JournalEntryForm
-        onSave={handleSave}
-        onCancel={handleCancel}
-        initialData={initialData}
-      />
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={0}
+      >
+        <JournalEntryForm
+          onSave={handleSave}
+          onCancel={handleCancel}
+          initialData={initialData}
+        />
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

@@ -1,5 +1,6 @@
 import { ModalProvider } from "@/contexts/ModalContext";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import "@/polyfills";
 import { tamaguiConfig } from "@/tamagui.config";
 import { ClerkProvider } from "@clerk/clerk-expo";
 import { tokenCache } from "@clerk/clerk-expo/token-cache";

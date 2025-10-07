@@ -4,7 +4,15 @@ import { getJournalEntryById, updateJournalEntry } from "@/lib/sanity/journal";
 import type { JOURNAL_ENTRY_BY_ID_QUERYResult } from "@/sanity/sanity.types";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Alert, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function EditEntryScreen() {
@@ -148,12 +156,18 @@ export default function EditEntryScreen() {
     <View
       style={[styles.container, { paddingTop: top, paddingBottom: bottom }]}
     >
-      <JournalEntryForm
-        initialData={initialData}
-        onSave={handleSave}
-        onCancel={handleCancel}
-        isEditing={true}
-      />
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={0}
+      >
+        <JournalEntryForm
+          initialData={initialData}
+          onSave={handleSave}
+          onCancel={handleCancel}
+          isEditing={true}
+        />
+      </KeyboardAvoidingView>
       {saving && (
         <View style={styles.savingOverlay}>
           <ActivityIndicator size="large" color="#3b82f6" />

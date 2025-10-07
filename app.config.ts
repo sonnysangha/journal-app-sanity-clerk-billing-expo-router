@@ -22,7 +22,7 @@ export default {
       predictiveBackGestureEnabled: false,
     },
     web: {
-      output: "static",
+      output: "server",
       favicon: "./assets/images/favicon.png",
     },
     plugins: [

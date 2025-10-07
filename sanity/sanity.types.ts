@@ -397,6 +397,53 @@ export type JOURNAL_ENTRY_BY_ID_QUERYResult = {
     color: string | null
   } | null
 } | null
+// Variable: USER_JOURNAL_ENTRIES_WITH_DATE_RANGE_QUERY
+// Query: *[  _type == "journalEntry"   && userId == $userId  && createdAt >= $startDate  && createdAt <= $endDate] | order(createdAt desc) {  _id,  title,  content,  mood,  createdAt,  aiGeneratedCategory->{    title,    color  }}
+export type USER_JOURNAL_ENTRIES_WITH_DATE_RANGE_QUERYResult = Array<{
+  _id: string
+  title: string | null
+  content: Array<
+    | {
+        children?: Array<{
+          marks?: Array<string>
+          text?: string
+          _type: 'span'
+          _key: string
+        }>
+        style?: 'blockquote' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'normal'
+        listItem?: 'bullet' | 'number'
+        markDefs?: Array<{
+          href?: string
+          _type: 'link'
+          _key: string
+        }>
+        level?: number
+        _type: 'block'
+        _key: string
+      }
+    | {
+        asset?: {
+          _ref: string
+          _type: 'reference'
+          _weak?: boolean
+          [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
+        }
+        media?: unknown
+        hotspot?: SanityImageHotspot
+        crop?: SanityImageCrop
+        alt?: string
+        caption?: string
+        _type: 'image'
+        _key: string
+      }
+  > | null
+  mood: 'happy' | 'neutral' | 'sad' | 'very-happy' | 'very-sad' | null
+  createdAt: string | null
+  aiGeneratedCategory: {
+    title: string | null
+    color: string | null
+  } | null
+}>
 
 // Query TypeMap
 import '@sanity/client'
@@ -409,5 +456,6 @@ declare module '@sanity/client' {
     '*[\n  _type == "dailyPrompt" \n  && isActive == true\n  && $tag in tags\n] | order(weight desc) {\n  _id,\n  title,\n  prompt,\n  emoji,\n  category->{\n    title,\n    color\n  },\n  suggestedMood,\n  isActive,\n  weight,\n  tags,\n  createdAt\n}': DAILY_PROMPTS_BY_TAG_QUERYResult
     '*[\n  _type == "journalEntry" \n  && userId == $userId\n] | order(createdAt desc) {\n  _id,\n  title,\n  content,\n  mood,\n  createdAt,\n  aiGeneratedCategory->{\n    title,\n    color\n  }\n}': USER_JOURNAL_ENTRIES_QUERYResult
     '*[\n  _type == "journalEntry" \n  && _id == $entryId\n][0]{\n  _id,\n  title,\n  content,\n  mood,\n  createdAt,\n  userId,\n  aiGeneratedCategory->{\n    title,\n    color\n  }\n}': JOURNAL_ENTRY_BY_ID_QUERYResult
+    '*[\n  _type == "journalEntry" \n  && userId == $userId\n  && createdAt >= $startDate\n  && createdAt <= $endDate\n] | order(createdAt desc) {\n  _id,\n  title,\n  content,\n  mood,\n  createdAt,\n  aiGeneratedCategory->{\n    title,\n    color\n  }\n}': USER_JOURNAL_ENTRIES_WITH_DATE_RANGE_QUERYResult
   }
 }

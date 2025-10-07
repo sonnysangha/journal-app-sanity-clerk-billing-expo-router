@@ -2,6 +2,7 @@ import { defineQuery } from "groq";
 import type {
   JOURNAL_ENTRY_BY_ID_QUERYResult,
   USER_JOURNAL_ENTRIES_QUERYResult,
+  USER_JOURNAL_ENTRIES_WITH_DATE_RANGE_QUERYResult,
 } from "../../sanity/sanity.types";
 import { sanityClient } from "./client";
 import { uploadImageToSanity } from "./images";
@@ -40,6 +41,23 @@ export const JOURNAL_ENTRY_BY_ID_QUERY = defineQuery(`*[
   mood,
   createdAt,
   userId,
+  aiGeneratedCategory->{
+    title,
+    color
+  }
+}`);
+
+export const USER_JOURNAL_ENTRIES_WITH_DATE_RANGE_QUERY = defineQuery(`*[
+  _type == "journalEntry" 
+  && userId == $userId
+  && createdAt >= $startDate
+  && createdAt <= $endDate
+] | order(createdAt desc) {
+  _id,
+  title,
+  content,
+  mood,
+  createdAt,
   aiGeneratedCategory->{
     title,
     color
@@ -179,6 +197,28 @@ export const getJournalEntryById = async (
     return entry;
   } catch (error) {
     console.error("Error fetching journal entry:", error);
+    throw error;
+  }
+};
+
+// Helper function to fetch journal entries with date range
+export const fetchJournalEntriesWithDateRange = async (
+  userId: string,
+  startDate: string,
+  endDate: string
+): Promise<USER_JOURNAL_ENTRIES_WITH_DATE_RANGE_QUERYResult> => {
+  try {
+    const entries = await sanityClient.fetch(
+      USER_JOURNAL_ENTRIES_WITH_DATE_RANGE_QUERY,
+      {
+        userId,
+        startDate,
+        endDate,
+      }
+    );
+    return entries;
+  } catch (error) {
+    console.error("Error fetching journal entries with date range:", error);
     throw error;
   }
 };
