@@ -4,6 +4,7 @@ import type {
   USER_JOURNAL_ENTRIES_QUERYResult,
   USER_JOURNAL_ENTRIES_WITH_DATE_RANGE_QUERYResult,
 } from "../../sanity/sanity.types";
+import { categorizeJournalEntry } from "../utils/categorize";
 import { sanityClient } from "./client";
 import { uploadImageToSanity } from "./images";
 
@@ -67,7 +68,30 @@ export const USER_JOURNAL_ENTRIES_WITH_DATE_RANGE_QUERY = defineQuery(`*[
 // Helper function to create journal entry in Sanity
 export const createJournalEntry = async (entry: JournalEntryInput) => {
   try {
-    // Upload all images first
+    console.log("Creating journal entry with auto-categorization...");
+
+    // Step 1: Categorize the entry using AI
+    let categoryId: string | undefined;
+    try {
+      const categorization = await categorizeJournalEntry(
+        entry.title,
+        entry.content,
+        entry.userId
+      );
+      categoryId = categorization.categoryId;
+      console.log(
+        `Entry categorized as: ${categorization.categoryTitle} (${categorization.action})`
+      );
+      console.log(`Reasoning: ${categorization.reasoning}`);
+    } catch (categorizationError) {
+      console.error(
+        "Categorization failed, continuing without category:",
+        categorizationError
+      );
+      // Continue without category if categorization fails
+    }
+
+    // Step 2: Upload all images
     const uploadedImages = await Promise.all(
       entry.images.map(async (img) => {
         const asset = await uploadImageToSanity(img.uri);
@@ -83,7 +107,7 @@ export const createJournalEntry = async (entry: JournalEntryInput) => {
       })
     );
 
-    // Create content blocks - mix text and images
+    // Step 3: Create content blocks - mix text and images
     const contentBlocks = [
       {
         _type: "block",
@@ -105,8 +129,8 @@ export const createJournalEntry = async (entry: JournalEntryInput) => {
       })),
     ];
 
-    // Create the journal entry document
-    const journalEntry = {
+    // Step 4: Create the journal entry document with category
+    const journalEntry: any = {
       _type: "journalEntry",
       title: entry.title,
       content: contentBlocks,
@@ -115,8 +139,17 @@ export const createJournalEntry = async (entry: JournalEntryInput) => {
       createdAt: new Date().toISOString(),
     };
 
-    // Save to Sanity
+    // Add category reference if categorization succeeded
+    if (categoryId) {
+      journalEntry.aiGeneratedCategory = {
+        _type: "reference",
+        _ref: categoryId,
+      };
+    }
+
+    // Step 5: Save to Sanity
     const result = await sanityClient.create(journalEntry);
+    console.log("Journal entry created successfully with ID:", result._id);
     return result;
   } catch (error) {
     console.error("Error creating journal entry:", error);
@@ -145,9 +178,45 @@ export const updateJournalEntry = async (
   updates: Partial<JournalEntryInput>
 ) => {
   try {
-    // If content is being updated, convert it to blocks
+    console.log("Updating journal entry with auto-categorization...");
+
+    // Step 1: Re-categorize if content or title is being updated
+    let categoryId: string | undefined;
+    if (updates.content || updates.title) {
+      try {
+        // Get the current entry to access userId and combine with updates
+        const currentEntry = await sanityClient.fetch(
+          JOURNAL_ENTRY_BY_ID_QUERY,
+          { entryId }
+        );
+
+        if (currentEntry && currentEntry.userId) {
+          const categorization = await categorizeJournalEntry(
+            updates.title !== undefined
+              ? updates.title
+              : currentEntry.title ?? undefined,
+            updates.content || "", // If content is being updated, use new content
+            currentEntry.userId
+          );
+          categoryId = categorization.categoryId;
+          console.log(
+            `Entry re-categorized as: ${categorization.categoryTitle} (${categorization.action})`
+          );
+          console.log(`Reasoning: ${categorization.reasoning}`);
+        }
+      } catch (categorizationError) {
+        console.error(
+          "Re-categorization failed, continuing without updating category:",
+          categorizationError
+        );
+        // Continue without updating category if categorization fails
+      }
+    }
+
+    // Step 2: Prepare update data
     const updateData: any = { ...updates };
 
+    // If content is being updated, convert it to blocks
     if (updates.content) {
       updateData.content = [
         {
@@ -167,7 +236,17 @@ export const updateJournalEntry = async (
       ];
     }
 
+    // Add updated category reference if re-categorization succeeded
+    if (categoryId) {
+      updateData.aiGeneratedCategory = {
+        _type: "reference",
+        _ref: categoryId,
+      };
+    }
+
+    // Step 3: Update the entry
     const result = await sanityClient.patch(entryId).set(updateData).commit();
+    console.log("Journal entry updated successfully");
     return result;
   } catch (error) {
     console.error("Error updating journal entry:", error);

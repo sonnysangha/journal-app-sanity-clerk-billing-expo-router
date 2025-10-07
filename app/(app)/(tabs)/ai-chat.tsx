@@ -12,6 +12,7 @@ import {
   StyleSheet,
   TextInput,
 } from "react-native";
+import Markdown from "react-native-markdown-display";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, Text, View, YStack } from "tamagui";
 
@@ -122,14 +123,51 @@ export default function AIChatScreen() {
                       switch (part.type) {
                         case "text":
                           return (
-                            <Text
+                            <Markdown
                               key={`${m.id}-${i}`}
-                              fontSize="$4"
-                              color={m.role === "user" ? "white" : "$color12"}
-                              style={{ lineHeight: 22 }}
+                              style={{
+                                body: {
+                                  color:
+                                    m.role === "user" ? "white" : "#1f2937",
+                                  fontSize: 16,
+                                  lineHeight: 22,
+                                },
+                                paragraph: {
+                                  marginTop: 0,
+                                  marginBottom: 0,
+                                  color:
+                                    m.role === "user" ? "white" : "#1f2937",
+                                },
+                                strong: {
+                                  color:
+                                    m.role === "user" ? "white" : "#1f2937",
+                                  fontWeight: "bold",
+                                },
+                                em: {
+                                  color:
+                                    m.role === "user" ? "white" : "#1f2937",
+                                  fontStyle: "italic",
+                                },
+                                link: {
+                                  color:
+                                    m.role === "user" ? "#cfe2ff" : "#007AFF",
+                                },
+                                bullet_list: {
+                                  color:
+                                    m.role === "user" ? "white" : "#1f2937",
+                                },
+                                ordered_list: {
+                                  color:
+                                    m.role === "user" ? "white" : "#1f2937",
+                                },
+                                list_item: {
+                                  color:
+                                    m.role === "user" ? "white" : "#1f2937",
+                                },
+                              }}
                             >
                               {part.text}
-                            </Text>
+                            </Markdown>
                           );
                         case "tool-getAllUserJournalEntries":
                           return (
@@ -292,6 +330,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f8f9fa",
     borderRadius: 12,
     marginVertical: 4,
+    marginBottom: 16,
     borderLeftWidth: 2,
     borderLeftColor: "#666",
   },

@@ -66,7 +66,8 @@ export default function EditEntryScreen() {
       });
 
       // Navigate back to the entry detail
-      router.replace(`/entry/${id}`);
+      router.dismiss();
+      router.push(`/(app)/(tabs)/entries`);
     } catch (error) {
       console.error("Failed to update journal entry:", error);
       Alert.alert(
