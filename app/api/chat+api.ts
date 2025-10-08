@@ -13,8 +13,8 @@ import {
 import { z } from "zod";
 
 export async function POST(req: Request) {
-  const { messages }: { messages: UIMessage[] } = await req.json();
-  const userId = req.headers.get("x-user-id");
+  const { messages, userId }: { messages: UIMessage[]; userId?: string } =
+    await req.json();
 
   if (!userId) {
     return new Response("Unauthorized", { status: 401 });

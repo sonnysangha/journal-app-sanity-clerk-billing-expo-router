@@ -3,7 +3,6 @@ import { useChat } from "@ai-sdk/react";
 import { Protect, useUser } from "@clerk/clerk-expo";
 import { MaterialIcons } from "@expo/vector-icons";
 import { DefaultChatTransport } from "ai";
-import { useRouter } from "expo-router";
 import { fetch as expoFetch } from "expo/fetch";
 import React, { useRef, useState } from "react";
 import {
@@ -23,13 +22,13 @@ export default function AIChatScreen() {
   const scrollViewRef = useRef<ScrollView>(null);
   const insets = useSafeAreaInsets();
   const { user } = useUser();
-  const router = useRouter();
+
   const { messages, error, sendMessage } = useChat({
     transport: new DefaultChatTransport({
       fetch: expoFetch as typeof globalThis.fetch,
       api: generateAPIUrl("/api/chat"),
-      headers: async () => ({
-        "x-user-id": user?.id || "",
+      body: async () => ({
+        userId: user?.id || "",
       }),
     }),
     onError: (error) => console.error(error, "ERROR"),
