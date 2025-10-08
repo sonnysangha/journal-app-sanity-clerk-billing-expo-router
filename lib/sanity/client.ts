@@ -5,7 +5,7 @@ import type { SanityImageSource } from "@sanity/image-url/lib/types/types";
 // Initialize Sanity client
 export const sanityClient = createClient({
   projectId: "ybgfg3ak", // Your project ID from sanity.config.ts
-  dataset: "production",
+  dataset: process.env.EXPO_PUBLIC_SANITY_DATASET,
   useCdn: false, // Set to false for write operations
   apiVersion: "2024-01-01",
   token: process.env.EXPO_PUBLIC_SANITY_TOKEN, // You'll need to add this
