@@ -111,7 +111,7 @@ export default function Page() {
                   onChangeText={setEmailAddress}
                   borderColor="$borderColor"
                   focusStyle={{
-                    borderColor: "$blue10",
+                    borderColor: "$purple10",
                   }}
                 />
               </YStack>
@@ -125,7 +125,7 @@ export default function Page() {
                   onChangeText={setPassword}
                   borderColor="$borderColor"
                   focusStyle={{
-                    borderColor: "$blue10",
+                    borderColor: "$purple10",
                   }}
                 />
               </YStack>
@@ -134,8 +134,9 @@ export default function Page() {
 
               <Button
                 size="$4"
-                theme="blue"
-                borderColor="$borderColor"
+                bg="#904BFF"
+                color="white"
+                borderColor="#904BFF"
                 onPress={onSignInPress}
                 disabled={!isLoaded || isLoading}
                 opacity={!isLoaded || isLoading ? 0.5 : 1}
@@ -155,7 +156,12 @@ export default function Page() {
               Don&apos;t have an account?
             </Paragraph>
             <Link href="/sign-up" asChild>
-              <Button variant="outlined" size="$3" theme="blue">
+              <Button
+                variant="outlined"
+                size="$3"
+                borderColor="#904BFF"
+                color="#904BFF"
+              >
                 Sign Up
               </Button>
             </Link>

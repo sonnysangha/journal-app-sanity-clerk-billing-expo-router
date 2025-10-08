@@ -81,7 +81,7 @@ export default function EntriesScreen() {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#3b82f6" />
+        <ActivityIndicator size="large" color="#904BFF" />
         <Text style={styles.loadingText}>Loading your journal entries...</Text>
       </View>
     );

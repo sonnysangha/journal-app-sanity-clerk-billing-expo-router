@@ -1,10 +1,12 @@
 import { SignOutButton } from "@/components/SignOutButton";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useStreaks } from "@/hooks/use-streaks";
-import { useUser } from "@clerk/clerk-expo";
-import { Image, StyleSheet } from "react-native";
+import { Protect, useUser } from "@clerk/clerk-expo";
+import { Image, Linking, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
+  Button,
+  Card,
   H1,
   H2,
   ScrollView,
@@ -48,90 +50,183 @@ export default function Profile() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={{
-          paddingTop: insets.top,
+          paddingTop: insets.top + 20,
         }}
       >
-        <YStack pb={insets.bottom + 100}>
-          {/* Profile Header Section */}
-          <YStack style={{ alignItems: "center" }} py="$8" gap="$5">
-            {/* Profile Picture */}
-            <View
-              style={{
-                borderRadius: 70,
-                overflow: "hidden",
-                width: 140,
-                height: 140,
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: "#f3f4f6",
-              }}
-            >
-              {user?.imageUrl ? (
-                <Image
-                  source={{ uri: user.imageUrl }}
-                  style={styles.profileImage}
-                />
-              ) : (
-                <Text fontSize={48} fontWeight="600" color="$color12">
-                  {getUserInitials()}
-                </Text>
-              )}
-            </View>
-
-            {/* Name */}
-            <YStack style={{ alignItems: "center" }} gap="$2">
-              <H1 fontSize={32} fontWeight="700">
-                {getFullName()}
-              </H1>
-              {user?.primaryEmailAddress?.emailAddress && (
-                <Text fontSize={15} color="$color10">
-                  {user.primaryEmailAddress.emailAddress}
-                </Text>
-              )}
-            </YStack>
-          </YStack>
-
-          {/* Stats Section */}
-          <XStack
-            px="$6"
-            py="$6"
-            gap="$4"
-            style={{ justifyContent: "space-around" }}
+        <YStack px="$4" gap="$4" pb={insets.bottom + 100}>
+          {/* Profile Header Card */}
+          <Card
+            elevate
+            size="$4"
+            bordered
+            bg="$background"
+            borderColor="$borderColor"
+            padding="$6"
           >
-            {/* Current Streak */}
-            <YStack style={{ alignItems: "center" }} gap="$2" flex={1}>
-              <XStack gap="$2" style={{ alignItems: "center" }}>
-                <IconSymbol size={20} name="flame.fill" color="#f59e0b" />
-                <Text fontSize={32} fontWeight="700" color="$color12">
+            <YStack gap="$4" style={{ alignItems: "center" }}>
+              {/* Profile Picture */}
+              <View
+                style={{
+                  borderRadius: 60,
+                  overflow: "hidden",
+                  width: 120,
+                  height: 120,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "#e5e7eb",
+                }}
+              >
+                {user?.imageUrl ? (
+                  <Image
+                    source={{ uri: user.imageUrl }}
+                    style={styles.profileImage}
+                  />
+                ) : (
+                  <Text fontSize={42} fontWeight="700" color="$color11">
+                    {getUserInitials()}
+                  </Text>
+                )}
+              </View>
+
+              {/* Name & Email */}
+              <YStack style={{ alignItems: "center" }} gap="$2">
+                <H1
+                  fontSize={28}
+                  fontWeight="700"
+                  style={{ textAlign: "center" }}
+                >
+                  {getFullName()}
+                </H1>
+                {user?.primaryEmailAddress?.emailAddress && (
+                  <Text fontSize={14} color="$color10">
+                    {user.primaryEmailAddress.emailAddress}
+                  </Text>
+                )}
+              </YStack>
+
+              {/* Plan Badge */}
+              <Protect
+                plan="pro"
+                fallback={
+                  <View style={styles.planBadge}>
+                    <Text fontSize={13} fontWeight="600" color="$color11">
+                      Free Plan
+                    </Text>
+                  </View>
+                }
+              >
+                <View style={styles.proPlanBadge}>
+                  <Text fontSize={13} fontWeight="700" color="#904BFF">
+                    ✨ Pro Plan
+                  </Text>
+                </View>
+              </Protect>
+            </YStack>
+          </Card>
+
+          {/* Stats Cards */}
+          <XStack gap="$4">
+            {/* Current Streak Card */}
+            <Card
+              elevate
+              size="$4"
+              bordered
+              bg="$background"
+              borderColor="$borderColor"
+              padding="$5"
+              flex={1}
+            >
+              <YStack gap="$3" style={{ alignItems: "center" }}>
+                <View style={styles.streakIconContainer}>
+                  <IconSymbol size={24} name="flame.fill" color="#f59e0b" />
+                </View>
+                <Text fontSize={36} fontWeight="800" color="$color12">
                   {currentStreak}
                 </Text>
-              </XStack>
-              <Text fontSize={13} color="$color10" fontWeight="500">
-                Day Streak
-              </Text>
-            </YStack>
+                <Text fontSize={12} color="$color10" fontWeight="600">
+                  Day Streak
+                </Text>
+              </YStack>
+            </Card>
 
-            {/* Best Streak */}
-            <YStack style={{ alignItems: "center" }} gap="$2" flex={1}>
-              <XStack gap="$2" style={{ alignItems: "center" }}>
-                <IconSymbol size={20} name="trophy.fill" color="#3b82f6" />
-                <Text fontSize={32} fontWeight="700" color="$color11">
+            {/* Best Streak Card */}
+            <Card
+              elevate
+              size="$4"
+              bordered
+              bg="$background"
+              borderColor="$borderColor"
+              padding="$5"
+              flex={1}
+            >
+              <YStack gap="$3" style={{ alignItems: "center" }}>
+                <View style={styles.bestStreakIconContainer}>
+                  <IconSymbol size={24} name="trophy.fill" color="#904BFF" />
+                </View>
+                <Text fontSize={36} fontWeight="800" color="$color12">
                   {longestStreak}
                 </Text>
-              </XStack>
-              <Text fontSize={13} color="$color10" fontWeight="500">
-                Best Streak
-              </Text>
-            </YStack>
+                <Text fontSize={12} color="$color10" fontWeight="600">
+                  Best Streak
+                </Text>
+              </YStack>
+            </Card>
           </XStack>
 
-          {/* Settings Section */}
-          <YStack px="$6" pt="$8" gap="$6">
-            <H2 fontSize={20} fontWeight="600" color="$color11">
-              Account
-            </H2>
-            <SignOutButton />
-          </YStack>
+          {/* Subscription Card */}
+          <Card
+            elevate
+            size="$4"
+            bordered
+            bg="$background"
+            borderColor="$borderColor"
+            padding="$5"
+          >
+            <YStack gap="$4">
+              <YStack gap="$2">
+                <H2 fontSize={18} fontWeight="700" color="$color12">
+                  Subscription
+                </H2>
+                <Text fontSize={13} color="$color10" lineHeight={18}>
+                  Manage your plan and billing settings
+                </Text>
+              </YStack>
+              <Button
+                size="$4"
+                bg="$purple9"
+                color="white"
+                pressStyle={{ opacity: 0.8 }}
+                fontWeight="600"
+                onPress={() => {
+                  Linking.openURL("http://localhost:8081/pricing");
+                }}
+              >
+                View Plans & Pricing
+              </Button>
+            </YStack>
+          </Card>
+
+          {/* Account Section */}
+          <Card
+            elevate
+            size="$4"
+            bordered
+            bg="$background"
+            borderColor="$borderColor"
+            padding="$5"
+          >
+            <YStack gap="$4">
+              <YStack gap="$2">
+                <H2 fontSize={18} fontWeight="700" color="$color12">
+                  Account
+                </H2>
+                <Text fontSize={13} color="$color10" lineHeight={18}>
+                  Manage your account settings
+                </Text>
+              </YStack>
+              <SignOutButton />
+            </YStack>
+          </Card>
         </YStack>
       </ScrollView>
     </View>
@@ -148,7 +243,39 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   profileImage: {
-    width: 140,
-    height: 140,
+    width: 120,
+    height: 120,
+  },
+  planBadge: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+    backgroundColor: "#f9fafb",
+  },
+  proPlanBadge: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(144, 75, 255, 0.4)",
+    backgroundColor: "rgba(144, 75, 255, 0.15)",
+  },
+  streakIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "rgba(245, 158, 11, 0.15)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  bestStreakIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "rgba(144, 75, 255, 0.15)",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

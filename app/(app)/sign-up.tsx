@@ -136,7 +136,7 @@ export default function SignUpScreen() {
                     onChangeText={setCode}
                     borderColor="$borderColor"
                     focusStyle={{
-                      borderColor: "$blue10",
+                      borderColor: "$purple10",
                     }}
                     keyboardType="numeric"
                     autoComplete="one-time-code"
@@ -147,7 +147,9 @@ export default function SignUpScreen() {
 
                 <Button
                   size="$4"
-                  theme="blue"
+                  bg="#904BFF"
+                  color="white"
+                  borderColor="#904BFF"
                   onPress={onVerifyPress}
                   disabled={!isLoaded || isLoading}
                   opacity={!isLoaded || isLoading ? 0.5 : 1}
@@ -167,7 +169,8 @@ export default function SignUpScreen() {
               <Button
                 variant="outlined"
                 size="$3"
-                theme="blue"
+                borderColor="#904BFF"
+                color="#904BFF"
                 onPress={() => setPendingVerification(false)}
               >
                 Resend
@@ -215,7 +218,7 @@ export default function SignUpScreen() {
                   onChangeText={setEmailAddress}
                   borderColor="$borderColor"
                   focusStyle={{
-                    borderColor: "$blue10",
+                    borderColor: "$purple10",
                   }}
                 />
               </YStack>
@@ -229,7 +232,7 @@ export default function SignUpScreen() {
                   onChangeText={setPassword}
                   borderColor="$borderColor"
                   focusStyle={{
-                    borderColor: "$blue10",
+                    borderColor: "$purple10",
                   }}
                 />
               </YStack>
@@ -238,7 +241,9 @@ export default function SignUpScreen() {
 
               <Button
                 size="$4"
-                theme="blue"
+                bg="#904BFF"
+                color="white"
+                borderColor="#904BFF"
                 onPress={onSignUpPress}
                 disabled={!isLoaded || isLoading}
                 opacity={!isLoaded || isLoading ? 0.5 : 1}
@@ -259,7 +264,8 @@ export default function SignUpScreen() {
             <Button
               variant="outlined"
               size="$3"
-              theme="blue"
+              borderColor="#904BFF"
+              color="#904BFF"
               onPress={() => router.canGoBack() && router.back()}
             >
               Sign In

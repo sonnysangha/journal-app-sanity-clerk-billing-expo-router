@@ -49,7 +49,7 @@ export default function EntryDetailScreen() {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#3b82f6" />
+        <ActivityIndicator size="large" color="#904BFF" />
       </View>
     );
   }
@@ -135,12 +135,12 @@ export default function EntryDetailScreen() {
               <Button
                 size="$3"
                 borderWidth={1}
-                borderColor="$blue9"
+                borderColor="$purple9"
                 bg="transparent"
-                color="$blue9"
+                color="$purple9"
                 pressStyle={{
-                  bg: "$blue2",
-                  borderColor: "$blue10",
+                  bg: "$purple2",
+                  borderColor: "$purple10",
                 }}
                 onPress={handleEdit}
               >
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   backButton: {
-    backgroundColor: "#3b82f6",
+    backgroundColor: "#904BFF",
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 12,

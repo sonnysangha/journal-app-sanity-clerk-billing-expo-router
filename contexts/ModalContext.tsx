@@ -82,7 +82,7 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
             gap="$4"
           >
             <YStack gap="$3" style={{ alignItems: "center" }}>
-              <Info size={48} color="$blue10" />
+              <Info size={48} color="$purple10" />
               <Dialog.Title style={{ textAlign: "center" }}>
                 {modalConfig.title}
               </Dialog.Title>

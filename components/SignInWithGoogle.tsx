@@ -68,10 +68,10 @@ export default function SignInWithGoogle() {
 
   return (
     <Button
-      theme="blue"
       variant="outlined"
-      borderColor="$borderColor"
+      borderColor="#904BFF"
       borderWidth={1}
+      color="#904BFF"
       onPress={onPress}
     >
       Sign in with Google

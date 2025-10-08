@@ -171,9 +171,9 @@ export default function DailyPromptCards() {
                     <IconSymbol
                       size={16}
                       name="pencil.circle.fill"
-                      color="#3b82f6"
+                      color="#904BFF"
                     />
-                    <Text fontSize="$2" color="$blue9" fontWeight="600">
+                    <Text fontSize="$2" color="$purple9" fontWeight="600">
                       Start Writing
                     </Text>
                   </XStack>
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#d1d5db",
   },
   activeDot: {
-    backgroundColor: "#3b82f6",
+    backgroundColor: "#904BFF",
     width: 20,
   },
 });

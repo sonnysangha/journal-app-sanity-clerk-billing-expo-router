@@ -458,7 +458,7 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingHorizontal: 20,
     paddingVertical: 10,
-    backgroundColor: "#3b82f6",
+    backgroundColor: "#904BFF",
     borderRadius: 20,
   },
   saveButtonText: {

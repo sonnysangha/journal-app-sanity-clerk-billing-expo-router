@@ -93,7 +93,7 @@ export default function EditEntryScreen() {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#3b82f6" />
+        <ActivityIndicator size="large" color="#904BFF" />
       </View>
     );
   }
@@ -171,7 +171,7 @@ export default function EditEntryScreen() {
       </KeyboardAvoidingView>
       {saving && (
         <View style={styles.savingOverlay}>
-          <ActivityIndicator size="large" color="#3b82f6" />
+          <ActivityIndicator size="large" color="#904BFF" />
           <Text style={styles.savingText}>Saving...</Text>
         </View>
       )}

@@ -255,8 +255,8 @@ export default function HomeScreen() {
               elevate
               size="$4"
               bordered
-              bg="$blue9"
-              borderColor="$blue9"
+              bg="$purple9"
+              borderColor="$purple9"
               padding="$4"
             >
               <XStack
@@ -288,7 +288,7 @@ export default function HomeScreen() {
                 gap="$3"
                 style={{ alignItems: "center", justifyContent: "center" }}
               >
-                <IconSymbol size={24} name="book.fill" color="#3b82f6" />
+                <IconSymbol size={24} name="book.fill" color="#904BFF" />
                 <Text fontSize="$5" fontWeight="600" color="$color12">
                   View Entries
                 </Text>
@@ -337,8 +337,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   todayCircle: {
-    backgroundColor: "#3b82f6",
-    borderColor: "#3b82f6",
+    backgroundColor: "#904BFF",
+    borderColor: "#904BFF",
   },
   moodIcon: {
     width: 40,

@@ -7,7 +7,7 @@ export default function Logo({ hasText = false }: { hasText?: boolean }) {
   return (
     <YStack gap="$3" style={{ alignItems: "center" }} mb="$4">
       <XStack
-        bg="$blue10"
+        bg="$purple10"
         p="$3"
         style={{
           alignItems: "center",

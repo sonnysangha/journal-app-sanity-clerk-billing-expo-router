@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
   },
   blockquote: {
     borderLeftWidth: 3,
-    borderLeftColor: "#3b82f6",
+    borderLeftColor: "#904BFF",
     paddingLeft: 16,
     marginVertical: 16,
     backgroundColor: "transparent",
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
   },
   link: {
-    color: "#3b82f6",
+    color: "#904BFF",
     textDecorationLine: "underline",
   },
   bulletList: {

@@ -13,10 +13,10 @@ function PlusButton() {
 
   return (
     <Card
-      bg="$blue9"
+      bg="$purple9"
       position="absolute"
       top={-20}
-      borderColor="$blue9"
+      borderColor="$purple9"
       borderRadius="$10"
       width={60}
       height={60}
